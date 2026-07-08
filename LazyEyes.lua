@@ -106,12 +106,14 @@ local function HookMinimap()
     local origOnMouseUp = Minimap:GetScript("OnMouseUp")
 
     Minimap:SetScript("OnMouseDown", function(self, button)
-        if LazyEyes.isActive then return end
+        -- Block right-click only when scanning is active
+        if LazyEyes.isActive and button == "RightButton" then return end
         if origOnMouseDown then return origOnMouseDown(self, button) end
     end)
 
     Minimap:SetScript("OnMouseUp", function(self, button)
-        if LazyEyes.isActive then return end
+        -- Block right-click only when scanning is active
+        if LazyEyes.isActive and button == "RightButton" then return end
         if origOnMouseUp then return origOnMouseUp(self, button) end
     end)
 end
