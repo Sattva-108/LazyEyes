@@ -98,6 +98,36 @@ local function PlayAlertSound()
 end
 
 -- =============================================
+-- MINIMAP MOUSE HOOKS (block right-click during scan)
+-- =============================================
+
+local function HookMinimap()
+    local origOnMouseDown = Minimap:GetScript("OnMouseDown")
+    local origOnMouseUp = Minimap:GetScript("OnMouseUp")
+
+    Minimap:SetScript("OnMouseDown", function(self, button)
+        if LazyEyes.isActive then return end
+        if origOnMouseDown then return origOnMouseDown(self, button) end
+    end)
+
+    Minimap:SetScript("OnMouseUp", function(self, button)
+        if LazyEyes.isActive then return end
+        if origOnMouseUp then return origOnMouseUp(self, button) end
+    end)
+end
+
+-- Hook at load time
+HookMinimap()
+
+-- Re-hook at PLAYER_LOGIN (after all addons loaded, including ElvUI)
+local hookFrame = CreateFrame("Frame")
+hookFrame:RegisterEvent("PLAYER_LOGIN")
+hookFrame:SetScript("OnEvent", function(self, event)
+    self:UnregisterEvent("PLAYER_LOGIN")
+    HookMinimap()
+end)
+
+-- =============================================
 -- MINIMAP STORAGE / RESTORE
 -- =============================================
 local function StoreMinimap()
