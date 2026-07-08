@@ -1,0 +1,10 @@
+## Interface: 30300
+## Title: LazyEyes Mining
+## Notes: Minimap scanner with flash & sound alerts for Mining
+## Author: Sattva
+## Version: 1.0
+## SavedVariables: LazyEyesSavedVars
+
+DefaultSettings.lua
+MiningData.lua
+LazyEyes.lua
