@@ -106,14 +106,21 @@ local function HookMinimap()
     local origOnMouseUp = Minimap:GetScript("OnMouseUp")
 
     Minimap:SetScript("OnMouseDown", function(self, button)
-        -- Block right-click only when scanning is active
-        if LazyEyes.isActive and button == "RightButton" then return end
+        -- When scanning is active and user right-clicks the minimap,
+        -- start mouselook directly so camera rotation still works
+        if LazyEyes.isActive and button == "RightButton" then
+            if not IsMouselooking() then MouselookStart() end
+            return
+        end
         if origOnMouseDown then return origOnMouseDown(self, button) end
     end)
 
     Minimap:SetScript("OnMouseUp", function(self, button)
-        -- Block right-click only when scanning is active
-        if LazyEyes.isActive and button == "RightButton" then return end
+        -- Stop mouselook when right-click is released during scan
+        if LazyEyes.isActive and button == "RightButton" then
+            if IsMouselooking() then MouselookStop() end
+            return
+        end
         if origOnMouseUp then return origOnMouseUp(self, button) end
     end)
 end
@@ -299,7 +306,7 @@ local function ScanUpdate(self, elapsed)
 
     if scanState == "WAITING" then
         timeElapsed = timeElapsed + elapsed
-        local interval = LazyEyes.saveData.settings.scanInterval or 0.3
+        local interval = LazyEyes.saveData.settings.scanInterval or 0.1
         local inCombat = LazyEyes.saveData.settings.pauseInCombat and UnitAffectingCombat("player")
         if timeElapsed >= interval and not IsMouselooking() and not IsMouseButtonDown(1) and not inCombat then
             LazyEyes_SwitchState("REPOSITION_MINIMAP")
