@@ -120,15 +120,19 @@ end
 
 local hookedMinimap = false
 local mouselookActive = false
-local suppressSyntheticMouseUp = false
 
--- OnUpdate frame to detect right-click release (avoids synthetic OnMouseUp issue)
+-- OnUpdate frame to detect right-click state (bypasses synthetic OnMouseUp issue)
 local mouseReleaseFrame = CreateFrame("Frame")
 mouseReleaseFrame:SetScript("OnUpdate", function()
-    if mouselookActive and not IsMouseButtonDown("RightButton") then
+    if not LazyEyes.isActive then return end
+    if IsMouseButtonDown("RightButton") and not mouselookActive and not IsMouselooking() then
+        mouselookActive = true
+        MouselookStart()
+        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes DBG|r >>> MouselookStart() via OnUpdate")
+    elseif mouselookActive and not IsMouseButtonDown("RightButton") then
         if IsMouselooking() then MouselookStop() end
         mouselookActive = false
-        DEFAULT_CHAT_FRAME:AddMessage("|cff00ccffLazyEyes DBG|r <<< MouselookStop() via OnUpdate (button released)")
+        DEFAULT_CHAT_FRAME:AddMessage("|cff00ccffLazyEyes DBG|r <<< MouselookStop() via OnUpdate")
     end
 end)
 
@@ -140,23 +144,17 @@ local function HookMinimap()
     local origOnMouseUp = Minimap:GetScript("OnMouseUp")
 
     Minimap:SetScript("OnMouseDown", function(self, button)
-        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes DBG|r OnMouseDown button=" .. tostring(button) .. " isActive=" .. tostring(LazyEyes.isActive) .. " mouselooking=" .. tostring(IsMouselooking()))
         if LazyEyes.isActive and button == "RightButton" then
-            if not IsMouselooking() then
-                suppressSyntheticMouseUp = true
-                MouselookStart()
-                suppressSyntheticMouseUp = false
-                mouselookActive = true
-                DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes DBG|r >>> MouselookStart() CALLED")
-            end
             return
         end
         if origOnMouseDown then return origOnMouseDown(self, button) end
     end)
 
     Minimap:SetScript("OnMouseUp", function(self, button)
-        if suppressSyntheticMouseUp then return end
-        if origOnMouseUp then origOnMouseUp(self, button) end
+        if LazyEyes.isActive and button == "RightButton" then
+            return
+        end
+        if origOnMouseUp then return origOnMouseUp(self, button) end
     end)
 end
 
@@ -352,7 +350,7 @@ local function ScanUpdate(self, elapsed)
 
     if scanState == "WAITING" then
         timeElapsed = timeElapsed + elapsed
-        local interval = LazyEyes.saveData.settings.scanInterval or 0.3
+        local interval = 0.001
         local inCombat = LazyEyes.saveData.settings.pauseInCombat and UnitAffectingCombat("player")
         if timeElapsed >= interval and not IsMouselooking() and not IsMouseButtonDown(1) and not inCombat then
             LazyEyes_SwitchState("REPOSITION_MINIMAP")
