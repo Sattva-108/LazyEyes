@@ -635,10 +635,10 @@ function LazyEyes_GUI_NodesTab_Create(parent)
         sf:SetAllPoints()
         subFrames[st.key] = sf
 
-        local header = sf:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        header:SetPoint("TOP", sf, "TOP", 0, -18)
-        header:SetText(st.label)
-        header:SetTextColor(1, 0.82, 0)
+        --local header = sf:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        --header:SetPoint("TOP", sf, "TOP", 0, -10)
+        --header:SetText(st.label)
+        --header:SetTextColor(1, 0.82, 0)
 
         -- Scroll frame
         local scroll = CreateFrame("ScrollFrame", nil, sf)
@@ -683,7 +683,7 @@ function LazyEyes_GUI_NodesTab_Create(parent)
     LazyEyes_GUI_Tabs_Create(frame, {
         { key = "ores", label = "Ores", frame = subFrames.ores },
         { key = "herbs", label = "Herbs", frame = subFrames.herbs },
-    }, -44)
+    }, -5)
 
     frame.allPills = {}
     for k, sf in pairs(subFrames) do frame.allPills[k] = sf.allPills end
