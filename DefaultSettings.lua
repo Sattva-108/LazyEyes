@@ -3,12 +3,31 @@
 
 function LazyEyes_GetDefaultSettings()
     return {
-        scanInterval = 0.3,         -- seconds between scans
-        flashScreen = true,         -- fullscreen green flash
-        playSound = true,           -- play alert sound
-        pauseInCombat = true,       -- pause while in combat
-        soundEffect = 1,            -- index into sound list
-        restartDelay = 5,           -- seconds before resuming after a find
+        -- Scan settings
+        scanInterval = 0.3,
+        flashScreen = true,
+        playSound = true,
+        pauseInCombat = true,
+        soundEffect = 1,
+        restartDelay = 5,
+        
+        -- GUI settings
+        zoomToMinimap = true,
+        difficultyColors = true,
+        pauseOnTarget = false,
+        flashColor = { r = 0, g = 1, b = 0, a = 0.5 },
+        soundID = 891,
+        
+        -- Node toggles (ores and herbs)
+        enabledNodes = {
+            ores = {},
+            herbs = {},
+        },
+        
+        -- HUD position
+        hudX = 0,
+        hudY = -200,
+        hudVisible = true,
     }
 end
 

@@ -258,6 +258,11 @@ end
 stateList["DISABLED"] = function()
     RestoreMinimap()
     if GameTooltip:GetAlpha() < 1 then GameTooltip:SetAlpha(1) end
+    -- Update HUD
+    if LazyEyes_GUI_HUD_UpdateStatus then
+        LazyEyes_GUI_HUD_UpdateStatus("Inactive")
+        LazyEyes_GUI_HUD_UpdateButton(false)
+    end
 end
 
 stateList["WAITING"] = function()
@@ -269,6 +274,11 @@ stateList["WAITING"] = function()
         extraDelay = 0
     end
     framesElapsed = 0
+    -- Update HUD
+    if LazyEyes_GUI_HUD_UpdateStatus then
+        LazyEyes_GUI_HUD_UpdateStatus("Scanning...", { r = 0, g = 1, b = 0 })
+        LazyEyes_GUI_HUD_UpdateButton(true)
+    end
 end
 
 stateList["REPOSITION_MINIMAP"] = function()
@@ -283,6 +293,10 @@ stateList["RESET_STATE"] = function()
         foundNode = false
         scanState = "IDLE"
         timeElapsed = 0
+        -- Update HUD with found node name
+        if LazyEyes_GUI_HUD_UpdateStatus and foundNodeName ~= "" then
+            LazyEyes_GUI_HUD_UpdateStatus(foundNodeName .. " Found!", { r = 1, g = 0.82, b = 0 })
+        end
     else
         LazyEyes_SwitchState("WAITING")
     end
@@ -384,6 +398,12 @@ mainFrame:SetScript("OnEvent", function(self, event, ...)
             end
 
             trackingList = LazyEyes_BuildTrackingList()
+            
+            -- Initialize GUI
+            if LazyEyes_GUI_Init then
+                LazyEyes_GUI_Init()
+            end
+            
             DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes Mining|r v1.0 loaded! Type |cff00ccff/leye|r to toggle.")
         end
 
@@ -409,6 +429,10 @@ function LazyEyes_StartScanning()
     if currentTexture ~= 136025 and not UnitAffectingCombat("player") then
         CastSpellByName("Find Minerals")
     end
+    -- Update HUD button
+    if LazyEyes_GUI_HUD_UpdateButton then
+        LazyEyes_GUI_HUD_UpdateButton(true)
+    end
     DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes:|r Scanning started.")
     return true
 end
@@ -417,6 +441,10 @@ function LazyEyes_StopScanning()
     LazyEyes_SwitchState("DISABLED")
     mainFrame:SetScript("OnUpdate", nil)
     LazyEyes.isActive = false
+    -- Update HUD button
+    if LazyEyes_GUI_HUD_UpdateButton then
+        LazyEyes_GUI_HUD_UpdateButton(false)
+    end
     DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes:|r Scanning stopped.")
 end
 
@@ -442,6 +470,19 @@ SlashCmdList["LAZYEYES"] = function(msg)
         else
             LazyEyes_StartScanning()
         end
+    end
+end
+
+-- =============================================
+-- SLASH COMMAND: /lgui
+-- =============================================
+SLASH_LAZYEYESGUI1 = "/lgui"
+
+SlashCmdList["LAZYEYESGUI"] = function()
+    if LazyEyes_GUI_Options_Toggle then
+        LazyEyes_GUI_Options_Toggle()
+    else
+        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes:|r GUI not loaded yet.")
     end
 end
 

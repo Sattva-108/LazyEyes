@@ -7,4 +7,5 @@
 
 DefaultSettings.lua
 MiningData.lua
+GUI.lua
 LazyEyes.lua
