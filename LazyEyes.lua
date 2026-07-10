@@ -211,7 +211,7 @@ local function SetMinimapLoc(xOffset, yOffset)
     local uiScale = Minimap:GetEffectiveScale()
     Minimap:ClearAllPoints()
     Minimap:SetPoint("CENTER", nil, "BOTTOMLEFT", xOffset + x/uiScale, yOffset + y/uiScale)
-    GameTooltip:SetScale(300)
+    GameTooltip:SetAlpha(0)
 end
 
 -- =============================================
