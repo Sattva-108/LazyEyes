@@ -378,7 +378,7 @@ function LazyEyes_GUI_ScanTab_Create(parent)
     h:SetPoint("TOP", frame, "TOP", 0, y); h:SetText("Scan Settings"); h:SetTextColor(1, 0.82, 0)
     y = y - 24
 
-    MakeSentence(frame, "Scan every", LazyEyes_GUI_GetSetting("scanInterval", 0.3), "sec", 0.1, 5.0, 0.05, function(v) LazyEyes_GUI_SetSetting("scanInterval", v) end):SetPoint("TOP", frame, "TOP", -30, y)
+    MakeSentence(frame, "Scan every", LazyEyes_GUI_GetSetting("scanInterval", 0.3), "sec", 0.001, 5.0, 0.05, function(v) LazyEyes_GUI_SetSetting("scanInterval", v) end):SetPoint("TOP", frame, "TOP", -30, y)
     y = y - 28
 
     MakeCheckbox(frame, "Zoom to minimap", LazyEyes_GUI_GetSetting("zoomToMinimap", true), function(v) LazyEyes_GUI_SetSetting("zoomToMinimap", v) end):SetPoint("TOP", frame, "TOP", -80, y)

@@ -98,37 +98,69 @@ local function PlayAlertSound()
 end
 
 -- =============================================
+-- MOUSELOOK DEBUG HOOK
+-- =============================================
+local origMouselookStart = MouselookStart
+MouselookStart = function()
+    local trace = debugstack(2, 3, 0)
+    DEFAULT_CHAT_FRAME:AddMessage("|cffff0000LazyEyes DBG|r >>> MouselookStart() called from:\n" .. trace)
+    return origMouselookStart()
+end
+
+local origMouselookStop = MouselookStop
+MouselookStop = function()
+    local trace = debugstack(2, 3, 0)
+    DEFAULT_CHAT_FRAME:AddMessage("|cff00ffffLazyEyes DBG|r <<< MouselookStop() called from:\n" .. trace)
+    return origMouselookStop()
+end
+
+-- =============================================
 -- MINIMAP MOUSE HOOKS (block right-click during scan)
 -- =============================================
 
+local hookedMinimap = false
+local mouselookActive = false
+local suppressSyntheticMouseUp = false
+
+-- OnUpdate frame to detect right-click release (avoids synthetic OnMouseUp issue)
+local mouseReleaseFrame = CreateFrame("Frame")
+mouseReleaseFrame:SetScript("OnUpdate", function()
+    if mouselookActive and not IsMouseButtonDown("RightButton") then
+        if IsMouselooking() then MouselookStop() end
+        mouselookActive = false
+        DEFAULT_CHAT_FRAME:AddMessage("|cff00ccffLazyEyes DBG|r <<< MouselookStop() via OnUpdate (button released)")
+    end
+end)
+
 local function HookMinimap()
+    if hookedMinimap then return end
+    hookedMinimap = true
+
     local origOnMouseDown = Minimap:GetScript("OnMouseDown")
     local origOnMouseUp = Minimap:GetScript("OnMouseUp")
 
     Minimap:SetScript("OnMouseDown", function(self, button)
-        -- When scanning is active and user right-clicks the minimap,
-        -- start mouselook directly so camera rotation still works
+        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes DBG|r OnMouseDown button=" .. tostring(button) .. " isActive=" .. tostring(LazyEyes.isActive) .. " mouselooking=" .. tostring(IsMouselooking()))
         if LazyEyes.isActive and button == "RightButton" then
-            if not IsMouselooking() then MouselookStart() end
+            if not IsMouselooking() then
+                suppressSyntheticMouseUp = true
+                MouselookStart()
+                suppressSyntheticMouseUp = false
+                mouselookActive = true
+                DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes DBG|r >>> MouselookStart() CALLED")
+            end
             return
         end
         if origOnMouseDown then return origOnMouseDown(self, button) end
     end)
 
     Minimap:SetScript("OnMouseUp", function(self, button)
-        -- Stop mouselook when right-click is released during scan
-        if LazyEyes.isActive and button == "RightButton" then
-            if IsMouselooking() then MouselookStop() end
-            return
-        end
-        if origOnMouseUp then return origOnMouseUp(self, button) end
+        if suppressSyntheticMouseUp then return end
+        if origOnMouseUp then origOnMouseUp(self, button) end
     end)
 end
 
--- Hook at load time
-HookMinimap()
-
--- Re-hook at PLAYER_LOGIN (after all addons loaded, including ElvUI)
+-- Hook at PLAYER_LOGIN (after all addons loaded, including ElvUI)
 local hookFrame = CreateFrame("Frame")
 hookFrame:RegisterEvent("PLAYER_LOGIN")
 hookFrame:SetScript("OnEvent", function(self, event)
@@ -320,7 +352,7 @@ local function ScanUpdate(self, elapsed)
 
     if scanState == "WAITING" then
         timeElapsed = timeElapsed + elapsed
-        local interval = LazyEyes.saveData.settings.scanInterval or 0.1
+        local interval = LazyEyes.saveData.settings.scanInterval or 0.3
         local inCombat = LazyEyes.saveData.settings.pauseInCombat and UnitAffectingCombat("player")
         if timeElapsed >= interval and not IsMouselooking() and not IsMouseButtonDown(1) and not inCombat then
             LazyEyes_SwitchState("REPOSITION_MINIMAP")
