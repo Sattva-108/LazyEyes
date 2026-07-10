@@ -98,41 +98,30 @@ local function PlayAlertSound()
 end
 
 -- =============================================
--- MOUSELOOK DEBUG HOOK
--- =============================================
-local origMouselookStart = MouselookStart
-MouselookStart = function()
-    local trace = debugstack(2, 3, 0)
-    DEFAULT_CHAT_FRAME:AddMessage("|cffff0000LazyEyes DBG|r >>> MouselookStart() called from:\n" .. trace)
-    return origMouselookStart()
-end
-
-local origMouselookStop = MouselookStop
-MouselookStop = function()
-    local trace = debugstack(2, 3, 0)
-    DEFAULT_CHAT_FRAME:AddMessage("|cff00ffffLazyEyes DBG|r <<< MouselookStop() called from:\n" .. trace)
-    return origMouselookStop()
-end
-
--- =============================================
 -- MINIMAP MOUSE HOOKS (block right-click during scan)
 -- =============================================
 
 local hookedMinimap = false
 local mouselookActive = false
 
--- OnUpdate frame to detect right-click state (bypasses synthetic OnMouseUp issue)
+-- OnUpdate frame to detect button state (bypasses frame event capture)
 local mouseReleaseFrame = CreateFrame("Frame")
 mouseReleaseFrame:SetScript("OnUpdate", function()
-    if not LazyEyes.isActive then return end
-    if IsMouseButtonDown("RightButton") and not mouselookActive and not IsMouselooking() then
+    if not LazyEyes.isActive then
+        if mouselookActive then
+            if IsMouselooking() then MouselookStop() end
+            mouselookActive = false
+        end
+        return
+    end
+    local rightDown = IsMouseButtonDown("RightButton")
+    local leftDown = IsMouseButtonDown("LeftButton")
+    if (rightDown or leftDown) and not mouselookActive and not IsMouselooking() then
         mouselookActive = true
         MouselookStart()
-        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes DBG|r >>> MouselookStart() via OnUpdate")
-    elseif mouselookActive and not IsMouseButtonDown("RightButton") then
+    elseif mouselookActive and not rightDown and not leftDown then
         if IsMouselooking() then MouselookStop() end
         mouselookActive = false
-        DEFAULT_CHAT_FRAME:AddMessage("|cff00ccffLazyEyes DBG|r <<< MouselookStop() via OnUpdate")
     end
 end)
 
@@ -144,14 +133,14 @@ local function HookMinimap()
     local origOnMouseUp = Minimap:GetScript("OnMouseUp")
 
     Minimap:SetScript("OnMouseDown", function(self, button)
-        if LazyEyes.isActive and button == "RightButton" then
+        if LazyEyes.isActive and (button == "RightButton" or button == "LeftButton") then
             return
         end
         if origOnMouseDown then return origOnMouseDown(self, button) end
     end)
 
     Minimap:SetScript("OnMouseUp", function(self, button)
-        if LazyEyes.isActive and button == "RightButton" then
+        if LazyEyes.isActive and (button == "RightButton" or button == "LeftButton") then
             return
         end
         if origOnMouseUp then return origOnMouseUp(self, button) end
@@ -220,13 +209,11 @@ local function PrepareMinimap()
     isScanning = true
     hideTooltip = true
 
-    if WorldFrame then WorldFrame:EnableMouse(false) end
-
     Minimap:SetAlpha(0)
     Minimap:SetScale(0.15)
 
     -- Disable mouse on minimap children to prevent POI tooltips
-    -- but keep Minimap itself mouse-enabled so tooltip appears on hover
+    -- Minimap itself stays mouse-enabled so tooltip appears for node detection
     for i = 1, select("#", Minimap:GetChildren()) do
         local child = select(i, Minimap:GetChildren())
         if child and child.EnableMouse then child:EnableMouse(false) end
