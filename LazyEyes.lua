@@ -273,14 +273,22 @@ local function IsMatch()
             if lineText then
                 local lineLower = string.lower(lineText)
                 for _, node in pairs(trackingList) do
+                    local matched = false
+                    local matchedName = nil
                     -- Check both English and Russian names
                     if string.find(lineLower, string.lower(node.en), 1, true) then
-                        foundNodeName = node.en
-                        return true
+                        matched = true
+                        matchedName = node.en
+                    elseif node.ru and string.find(lineLower, string.lower(node.ru), 1, true) then
+                        matched = true
+                        matchedName = node.ru
                     end
-                    if node.ru and string.find(lineLower, string.lower(node.ru), 1, true) then
-                        foundNodeName = node.ru
-                        return true
+                    if matched then
+                        -- Check if this node is enabled in GUI (ores category)
+                        if LazyEyes_GUI_IsNodeEnabled("ores", matchedName) then
+                            foundNodeName = matchedName
+                            return true
+                        end
                     end
                 end
             end
