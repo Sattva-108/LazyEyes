@@ -19,13 +19,13 @@ LazyEyes_MiningData = {
         skillRequired = 75, yellowAt = 100, greenAt = 125, grayAt = 175,
         ru = "Серебряная жила",
     },
-    ["Incendicite"] = {
+    ["Incendicite Mineral Vein"] = {
         skillRequired = 65, yellowAt = 90, greenAt = 115, grayAt = 165,
-        ru = "Горючий камень",
+        ru = "Ароматитовая жила",
     },
-    ["Lesser Bloodstone"] = {
+    ["Lesser Bloodstone Deposit"] = {
         skillRequired = 75, yellowAt = 100, greenAt = 125, grayAt = 175,
-        ru = "Малый кровавик",
+        ru = "Малое месторождение кровавого камня",
     },
     ["Iron Deposit"] = {
         skillRequired = 125, yellowAt = 150, greenAt = 175, grayAt = 225,
@@ -37,7 +37,7 @@ LazyEyes_MiningData = {
     },
     ["Mithril Deposit"] = {
         skillRequired = 175, yellowAt = 200, greenAt = 225, grayAt = 275,
-        ru = "Залежи мифрила",
+        ru = "Мифриловые залежи",
     },
     ["Truesilver Deposit"] = {
         skillRequired = 205, yellowAt = 230, greenAt = 255, grayAt = 305,
@@ -55,14 +55,34 @@ LazyEyes_MiningData = {
         skillRequired = 275, yellowAt = 290, greenAt = 305, grayAt = 350,
         ru = "Богатая ториевая жила",
     },
+    ["Ooze Covered Silver Vein"] = {
+        skillRequired = 75, yellowAt = 100, greenAt = 125, grayAt = 175,
+        ru = "Покрытая слизью серебряная жила",
+    },
+    ["Ooze Covered Gold Vein"] = {
+        skillRequired = 155, yellowAt = 180, greenAt = 205, grayAt = 255,
+        ru = "Покрытая слизью золотая жила",
+    },
+    ["Ooze Covered Mithril Deposit"] = {
+        skillRequired = 175, yellowAt = 200, greenAt = 225, grayAt = 275,
+        ru = "Покрытые слизью мифриловые залежи",
+    },
+    ["Ooze Covered Truesilver Deposit"] = {
+        skillRequired = 205, yellowAt = 230, greenAt = 255, grayAt = 305,
+        ru = "Покрытые слизью залежи истинного серебра",
+    },
     ["Ooze Covered Thorium Vein"] = {
         skillRequired = 245, yellowAt = 270, greenAt = 295, grayAt = 345,
         ru = "Покрытая слизью ториевая жила",
     },
+    ["Ooze Covered Rich Thorium Vein"] = {
+        skillRequired = 275, yellowAt = 290, greenAt = 305, grayAt = 350,
+        ru = "Покрытая слизью богатая ториевая жила",
+    },
     -- TBC / Outland
     ["Fel Iron Deposit"] = {
         skillRequired = 300, yellowAt = 325, greenAt = 350, grayAt = 400,
-        ru = "Залежи оскверненного железа",
+        ru = "Месторождение оскверненного железа",
     },
     ["Adamantite Deposit"] = {
         skillRequired = 325, yellowAt = 350, greenAt = 375, grayAt = 425,
@@ -74,11 +94,11 @@ LazyEyes_MiningData = {
     },
     ["Khorium Vein"] = {
         skillRequired = 375, yellowAt = 400, greenAt = 425, grayAt = 475,
-        ru = "Жила кория",
+        ru = "Кориевая жила",
     },
     ["Nethercite Deposit"] = {
         skillRequired = 350, yellowAt = 375, greenAt = 400, grayAt = 450,
-        ru = "Залежи бессилия",
+        ru = "Месторождение хаотита",
     },
     -- WotLK / Northrend
     ["Cobalt Deposit"] = {
@@ -91,15 +111,15 @@ LazyEyes_MiningData = {
     },
     ["Saronite Deposit"] = {
         skillRequired = 400, yellowAt = 425, greenAt = 450, grayAt = 475,
-        ru = "Залежи саронита",
+        ru = "Месторождение саронита",
     },
     ["Rich Saronite Deposit"] = {
         skillRequired = 425, yellowAt = 450, greenAt = 475, grayAt = 500,
-        ru = "Богатые залежи саронита",
+        ru = "Богатое месторождение саронита",
     },
     ["Titanium Vein"] = {
         skillRequired = 450, yellowAt = 475, greenAt = 500, grayAt = 525,
-        ru = "Жила титана",
+        ru = "Залежи титана",
     },
 }
 

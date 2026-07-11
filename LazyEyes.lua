@@ -284,8 +284,8 @@ local function IsMatch()
                         matchedName = node.ru
                     end
                     if matched then
-                        -- Check if this node is enabled in GUI (ores category)
-                        if LazyEyes_GUI_IsNodeEnabled("ores", matchedName) then
+                        -- Check if this node is enabled in GUI (always use English name)
+                        if LazyEyes_GUI_IsNodeEnabled("ores", node.en) then
                             foundNodeName = matchedName
                             return true
                         end
