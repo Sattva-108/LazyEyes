@@ -144,14 +144,16 @@ local function HookMinimap()
     local origOnMouseUp = Minimap:GetScript("OnMouseUp")
 
     Minimap:SetScript("OnMouseDown", function(self, button)
-        if LazyEyes.isActive and not (UnitAffectingCombat and UnitAffectingCombat("player")) and button == "RightButton" then
+        local inCombat = UnitAffectingCombat and UnitAffectingCombat("player")
+        if LazyEyes.isActive and not inCombat and button == "RightButton" and Minimap:GetScale() < 0.5 then
             return
         end
         if origOnMouseDown then return origOnMouseDown(self, button) end
     end)
 
     Minimap:SetScript("OnMouseUp", function(self, button)
-        if LazyEyes.isActive and not (UnitAffectingCombat and UnitAffectingCombat("player")) and button == "RightButton" then
+        local inCombat = UnitAffectingCombat and UnitAffectingCombat("player")
+        if LazyEyes.isActive and not inCombat and button == "RightButton" and Minimap:GetScale() < 0.5 then
             return
         end
         if origOnMouseUp then return origOnMouseUp(self, button) end
