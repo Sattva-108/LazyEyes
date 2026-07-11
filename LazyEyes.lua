@@ -107,7 +107,7 @@ local mouselookActive = false
 -- OnUpdate frame to detect button state (bypasses frame event capture)
 local mouseReleaseFrame = CreateFrame("Frame")
 mouseReleaseFrame:SetScript("OnUpdate", function()
-    if not LazyEyes.isActive then
+    if not LazyEyes.isActive or (UnitAffectingCombat and UnitAffectingCombat("player")) then
         if mouselookActive then
             if IsMouselooking() then MouselookStop() end
             mouselookActive = false
@@ -132,14 +132,14 @@ local function HookMinimap()
     local origOnMouseUp = Minimap:GetScript("OnMouseUp")
 
     Minimap:SetScript("OnMouseDown", function(self, button)
-        if LazyEyes.isActive and button == "RightButton" then
+        if LazyEyes.isActive and not (UnitAffectingCombat and UnitAffectingCombat("player")) and button == "RightButton" then
             return
         end
         if origOnMouseDown then return origOnMouseDown(self, button) end
     end)
 
     Minimap:SetScript("OnMouseUp", function(self, button)
-        if LazyEyes.isActive and button == "RightButton" then
+        if LazyEyes.isActive and not (UnitAffectingCombat and UnitAffectingCombat("player")) and button == "RightButton" then
             return
         end
         if origOnMouseUp then return origOnMouseUp(self, button) end
