@@ -478,12 +478,12 @@ function LazyEyes_GUI_AlertsTab_Create(parent)
     y = y - 32
 
     local sh = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    sh:SetPoint("TOP", frame, "TOP", 0, y); sh:SetText("Sound Effect"); sh:SetTextColor(1, 0.82, 0)
+    sh:SetPoint("TOP", frame, "TOP", 0, y); sh:SetText("Node Found Sound"); sh:SetTextColor(1, 0.82, 0)
     y = y - 24
 
     local si = LazyEyes_GUI_GetSetting("soundEffect", 1)
     local sndBtn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-    sndBtn:SetSize(200, 22); sndBtn:SetPoint("TOP", frame, "TOP", -100, y)
+    sndBtn:SetSize(200, 22); sndBtn:SetPoint("TOP", frame, "TOP", 0, y)
     sndBtn:SetText(LazyEyes_SoundEffects[si] and LazyEyes_SoundEffects[si].name or "Coin")
     sndBtn:SetScript("OnClick", function(self)
         si = si + 1
@@ -492,6 +492,24 @@ function LazyEyes_GUI_AlertsTab_Create(parent)
         LazyEyes_GUI_SetSetting("soundEffect", si)
         LazyEyes_GUI_SetSetting("soundID", LazyEyes_SoundEffects[si].id)
         PlaySound(LazyEyes_SoundEffects[si].id, "Master")
+    end)
+    y = y - 32
+
+    local tsh = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    tsh:SetPoint("TOP", frame, "TOP", 0, y); tsh:SetText("Tracking Warning Sound"); tsh:SetTextColor(1, 0.82, 0)
+    y = y - 24
+
+    local tsi = LazyEyes_GUI_GetSetting("trackingSound", 1)
+    local tsndBtn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
+    tsndBtn:SetSize(200, 22); tsndBtn:SetPoint("TOP", frame, "TOP", 0, y)
+    tsndBtn:SetText(LazyEyes_WarningSounds[tsi] and LazyEyes_WarningSounds[tsi].name or "Raid Warning")
+    tsndBtn:SetScript("OnClick", function(self)
+        tsi = tsi + 1
+        if tsi > #LazyEyes_WarningSounds then tsi = 1 end
+        self:SetText(LazyEyes_WarningSounds[tsi].name)
+        LazyEyes_GUI_SetSetting("trackingSound", tsi)
+        LazyEyes_GUI_SetSetting("trackingSoundID", LazyEyes_WarningSounds[tsi].id)
+        PlaySound(LazyEyes_WarningSounds[tsi].id, "Master")
     end)
 
     frame:Hide()

@@ -19,6 +19,24 @@ local minimapSettings = {}
 local isScanning = false
 local hideTooltip = false
 local trackingList = {}
+local trackingCheckTimer = 0
+
+local function HasActiveTracking()
+    local currentTexture = GetTrackingTexture()
+    return currentTexture and (
+        currentTexture:find("Earthquake") or      -- Find Minerals
+        currentTexture:find("Flower_02")          -- Find Herbs
+    )
+end
+
+local function CheckTrackingWarning()
+    if not LazyEyes.isActive or LazyEyes._ignoreTrackingWarning then return end
+    if not HasActiveTracking() then
+        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes:|r No mining or herb tracking active! |Hlazyeys:stop|h|cff00ccff[Stop scan]|h|r |Hlazyeys:ignore|h|cff00ccff[Ignore]|h|r")
+        local snd = LazyEyes.saveData and LazyEyes.saveData.settings and LazyEyes.saveData.settings.trackingSoundID
+        if snd then PlaySound(snd, "Master") end
+    end
+end
 
 -- Tooltip hooks: allow text population but hide visually during scan
 local originalGameTooltipShow = GameTooltip.Show
@@ -348,6 +366,13 @@ local function ScanUpdate(self, elapsed)
     -- Skip during flight path
     if UnitOnTaxi and UnitOnTaxi("player") then return end
 
+    -- Check tracking every 60 seconds
+    trackingCheckTimer = trackingCheckTimer + elapsed
+    if trackingCheckTimer >= 60 then
+        trackingCheckTimer = 0
+        CheckTrackingWarning()
+    end
+
     if scanState == "WAITING" then
         timeElapsed = timeElapsed + elapsed
         local interval = 0.5
@@ -507,22 +532,14 @@ function LazyEyes_StartScanning()
     trackingList = LazyEyes_BuildTrackingList()
 
     -- Check if Find Minerals or Find Herbs tracking is active
-    local currentTexture = GetTrackingTexture()
-    local hasTracking = (currentTexture and (
-        currentTexture:find("Earthquake") or      -- Find Minerals
-        currentTexture:find("Flower_02")          -- Find Herbs
-    )) or false
-    if not hasTracking then
-        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes:|r No mining or herb tracking active! |Hlazyeys:stop|h|cff00ccff[Stop scan]|h|r")
+    if not HasActiveTracking() and not LazyEyes._ignoreTrackingWarning then
+        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes:|r No mining or herb tracking active! |Hlazyeys:stop|h|cff00ccff[Stop scan]|h|r |Hlazyeys:ignore|h|cff00ccff[Ignore]|h|r")
     end
 
     LazyEyes_SwitchState("WAITING")
     mainFrame:SetScript("OnUpdate", ScanUpdate)
     LazyEyes.isActive = true
-    -- Ensure Find Minerals is active
-    if not hasTracking and not UnitAffectingCombat("player") then
-        CastSpellByName("Find Minerals")
-    end
+    trackingCheckTimer = 0
     -- Update HUD button
     if LazyEyes_GUI_HUD_UpdateButton then
         LazyEyes_GUI_HUD_UpdateButton(true)
@@ -535,6 +552,8 @@ function LazyEyes_StopScanning()
     LazyEyes_SwitchState("DISABLED")
     mainFrame:SetScript("OnUpdate", nil)
     LazyEyes.isActive = false
+    LazyEyes._ignoreTrackingWarning = nil
+    LazyEyes._ignoreTrackingWarning = false
     -- Update HUD button
     if LazyEyes_GUI_HUD_UpdateButton then
         LazyEyes_GUI_HUD_UpdateButton(false)
@@ -595,6 +614,10 @@ function SetItemRef(link, text, button, chatFrame)
     local command = link:match("^lazyeys:(.+)$")
     if command == "stop" then
         LazyEyes_StopScanning()
+        return
+    elseif command == "ignore" then
+        LazyEyes._ignoreTrackingWarning = true
+        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes:|r Tracking warning silenced for this session.")
         return
     end
     return origSetItemRef(link, text, button, chatFrame)

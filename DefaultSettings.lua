@@ -11,6 +11,8 @@ function LazyEyes_GetDefaultSettings()
         soundEffect = 1,
         restartDelay = 5,
         autoStartScan = true,
+        trackingSound = 1,
+        trackingSoundID = 8959,
         
         -- GUI settings
         zoomToMinimap = true,
@@ -35,9 +37,13 @@ end
 LazyEyes_SoundEffects = {
     { name = "Coin (Default)", id = 891 },
     { name = "Quest Complete", id = 878 },
-    { name = "Raid Warning", id = 8959 },
-    { name = "PvP Flag", id = 8174 },
-    { name = "Ready Check", id = 8960 },
     { name = "Level Up", id = 888 },
     { name = "Loot Coin", id = 120 },
+}
+
+LazyEyes_WarningSounds = {
+    { name = "Raid Warning", id = 8959 },
+    { name = "Ready Check", id = 8960 },
+    { name = "PvP Flag", id = 8174 },
+    { name = "Spell Hurt", id = 847 },
 }
