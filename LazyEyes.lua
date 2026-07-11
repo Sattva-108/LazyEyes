@@ -435,6 +435,11 @@ mainFrame:SetScript("OnEvent", function(self, event, ...)
             DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes Mining|r v1.0 loaded! Type |cff00ccff/leye|r to toggle.")
         end
 
+    elseif event == "PLAYER_ENTERING_WORLD" then
+        if LazyEyes.saveData and LazyEyes.saveData.settings.autoStartScan and not LazyEyes.isActive then
+            LazyEyes_StartScanning()
+        end
+
     elseif event == "PLAYER_LOGOUT" then
         LazyEyesSavedVars = LazyEyes.saveData and LazyEyes.saveData.settings
     end
@@ -442,6 +447,7 @@ end)
 
 mainFrame:RegisterEvent("ADDON_LOADED")
 mainFrame:RegisterEvent("PLAYER_LOGOUT")
+mainFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 
 -- =============================================
 -- START / STOP

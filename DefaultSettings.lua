@@ -4,12 +4,13 @@
 function LazyEyes_GetDefaultSettings()
     return {
         -- Scan settings
-        scanInterval = 0.3,
+        scanInterval = 0.5,
         flashScreen = true,
         playSound = true,
         pauseInCombat = true,
         soundEffect = 1,
         restartDelay = 5,
+        autoStartScan = true,
         
         -- GUI settings
         zoomToMinimap = true,
