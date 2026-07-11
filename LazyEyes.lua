@@ -116,11 +116,23 @@ mouseReleaseFrame:SetScript("OnUpdate", function()
     end
     local rightDown = IsMouseButtonDown("RightButton")
     if rightDown and not mouselookActive and not IsMouselooking() then
-        mouselookActive = true
-        MouselookStart()
+        -- Only start mouselook if cursor is NOT over a UI element
+        local focus = GetMouseFocus()
+        if not focus or focus == WorldFrame or focus == Minimap then
+            mouselookActive = true
+            MouselookStart()
+        end
     elseif mouselookActive and not rightDown then
         if IsMouselooking() then MouselookStop() end
         mouselookActive = false
+    end
+    -- Stop mouselook if cursor moves over a UI element while it's active
+    if mouselookActive then
+        local focus = GetMouseFocus()
+        if focus and focus ~= WorldFrame and focus ~= Minimap then
+            if IsMouselooking() then MouselookStop() end
+            mouselookActive = false
+        end
     end
 end)
 
