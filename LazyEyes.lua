@@ -455,12 +455,22 @@ mainFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 function LazyEyes_StartScanning()
     if not LazyEyes.saveData then return false end
     trackingList = LazyEyes_BuildTrackingList()
+
+    -- Check if Find Minerals or Find Herbs tracking is active
+    local currentTexture = GetTrackingTexture()
+    local hasTracking = (currentTexture and (
+        currentTexture:find("Earthquake") or      -- Find Minerals
+        currentTexture:find("Flower_02")          -- Find Herbs
+    )) or false
+    if not hasTracking then
+        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes:|r No mining or herb tracking active! |Hlazyeys:stop|h|cff00ccff[Stop scan]|h|r")
+    end
+
     LazyEyes_SwitchState("WAITING")
     mainFrame:SetScript("OnUpdate", ScanUpdate)
     LazyEyes.isActive = true
     -- Ensure Find Minerals is active
-    local currentTexture = GetTrackingTexture()
-    if currentTexture ~= 136025 and not UnitAffectingCombat("player") then
+    if not hasTracking and not UnitAffectingCombat("player") then
         CastSpellByName("Find Minerals")
     end
     -- Update HUD button
@@ -526,3 +536,16 @@ end
 BINDING_HEADER_LAZYEYES = "LazyEyes"
 BINDING_NAME_LAZYEYES_TOGGLE = "Toggle Mining Scanner"
 _G["SLASH_LAZYEYES1"] = "/leye"
+
+-- =============================================
+-- CHAT HYPERLINK HANDLER
+-- =============================================
+local origSetItemRef = SetItemRef
+function SetItemRef(link, text, button, chatFrame)
+    local command = link:match("^lazyeys:(.+)$")
+    if command == "stop" then
+        LazyEyes_StopScanning()
+        return
+    end
+    return origSetItemRef(link, text, button, chatFrame)
+end
