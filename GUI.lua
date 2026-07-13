@@ -383,6 +383,17 @@ function LazyEyes_GUI_ScanTab_Create(parent)
     y = y - 24
 
     MakeCheckbox(frame, "Auto start on login", LazyEyes_GUI_GetSetting("autoStartScan", true), function(v) LazyEyes_GUI_SetSetting("autoStartScan", v) end):SetPoint("TOP", frame, "TOP", -80, y)
+    y = y - 24
+
+    local zoomCb = MakeCheckbox(frame, "Zoom out minimap on scan", LazyEyes_GUI_GetSetting("zoomMinimap", true), function(v) LazyEyes_GUI_SetSetting("zoomMinimap", v) end)
+    zoomCb:SetPoint("TOP", frame, "TOP", -80, y)
+    zoomCb:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:AddLine("Zoom out minimap on scan", 1, 0.82, 0)
+        GameTooltip:AddLine("Temporarily zooms out the minimap during scanning to detect nearby nodes. Disable if you prefer the minimap zoom level to stay unchanged.", 1, 1, 1, true)
+        GameTooltip:Show()
+    end)
+    zoomCb:SetScript("OnLeave", function() GameTooltip:Hide() end)
     y = y - 32
 
     local kh = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -620,7 +631,7 @@ function LazyEyes_GUI_AlertsTab_Create(parent)
     y = y - 32
 
     local tsh = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    tsh:SetPoint("TOP", frame, "TOP", 0, y); tsh:SetText("Tracking Warning Sound"); tsh:SetTextColor(1, 0.82, 0)
+    tsh:SetPoint("TOP", frame, "TOP", 0, y); tsh:SetText("Tracking Missing Sound"); tsh:SetTextColor(1, 0.82, 0)
     y = y - 24
 
     local tsi = LazyEyes_GUI_GetSetting("trackingSound", 1)

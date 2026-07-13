@@ -11,6 +11,7 @@ function LazyEyes_GetDefaultSettings()
         soundEffect = 1,
         restartDelay = 5,
         autoStartScan = true,
+        zoomMinimap = true,
         trackingSound = 1,
         trackingSoundID = 8959,
         

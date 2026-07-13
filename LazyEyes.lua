@@ -389,7 +389,7 @@ local function ScanUpdate(self, elapsed)
     if trackingCheckTimer >= 60 then
         trackingCheckTimer = 0
         CheckTrackingWarning()
-        Minimap:SetZoom(0)
+        if LazyEyes.saveData.settings.zoomMinimap then Minimap:SetZoom(0) end
     end
 
     if scanState == "WAITING" then
@@ -561,7 +561,7 @@ function LazyEyes_StartScanning()
     mainFrame:SetScript("OnUpdate", ScanUpdate)
     LazyEyes.isActive = true
     trackingCheckTimer = 0
-    Minimap:SetZoom(0)
+    if LazyEyes.saveData.settings.zoomMinimap then Minimap:SetZoom(0) end
     -- Update HUD button
     if LazyEyes_GUI_HUD_UpdateButton then
         LazyEyes_GUI_HUD_UpdateButton(true)
