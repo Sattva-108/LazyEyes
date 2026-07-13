@@ -916,9 +916,9 @@ function LazyEyes_GUI_Options_Create()
     nodesTab = LazyEyes_GUI_NodesTab_Create(cf)
 
     local tabGroup = LazyEyes_GUI_Tabs_Create(f, {
+        { key = "nodes", label = "Nodes", frame = nodesTab },
         { key = "scan", label = "Scan", frame = scanTab },
         { key = "alerts", label = "Alerts", frame = alertsTab },
-        { key = "nodes", label = "Nodes", frame = nodesTab },
     }, -24)
 
     LazyEyes_GUI.optionsFrame = f
