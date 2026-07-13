@@ -24,11 +24,6 @@ function LazyEyes_GetDefaultSettings()
             ores = {},
             herbs = {},
         },
-        
-        -- HUD position
-        hudX = 0,
-        hudY = -200,
-        hudVisible = true,
     }
 end
 

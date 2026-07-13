@@ -98,7 +98,6 @@ table.sort(LazyEyes_HerbData, function(a, b) return a.skill < b.skill end)
 -- =============================================
 LazyEyes_GUI = {}
 LazyEyes_GUI.saveData = nil
-LazyEyes_GUI.hudFrame = nil
 LazyEyes_GUI.optionsFrame = nil
 
 function LazyEyes_GUI_Init()
@@ -116,7 +115,6 @@ function LazyEyes_GUI_Init()
         if nodes.herbs[herb.name] == nil then nodes.herbs[herb.name] = true end
     end
     LazyEyes_GUI_SetSetting("enabledNodes", nodes)
-    LazyEyes_GUI_HUD_Create()
     LazyEyes_GUI_Options_Create()
     LazyEyes_GUI_Options_RegisterBlizzard()
 end
@@ -258,78 +256,6 @@ function MakeCheckbox(parent, text, default, callback)
         if self.callback then self.callback(self.checked) end
     end)
     return check
-end
-
--- =============================================
--- HUD
--- =============================================
-function LazyEyes_GUI_HUD_Create()
-    local f = CreateFrame("Frame", "LazyEyesHUD", UIParent, nil)
-    f:SetSize(200, 90)
-    f:SetFrameStrata("HIGH")
-    f:SetBackdrop({
-        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-        tile = true, tileSize = 32, edgeSize = 32,
-        insets = { left = 11, right = 12, top = 12, bottom = 11 },
-    })
-    f:SetPoint("CENTER", UIParent, "CENTER", LazyEyes_GUI_GetSetting("hudX", 0), LazyEyes_GUI_GetSetting("hudY", -200))
-    f:SetMovable(true); f:EnableMouse(true); f:RegisterForDrag("LeftButton")
-    f:SetScript("OnDragStart", function(self) self:StartMoving() end)
-    f:SetScript("OnDragStop", function(self)
-        self:StopMovingOrSizing()
-        local _, _, _, x, y = self:GetPoint()
-        LazyEyes_GUI_SetSetting("hudX", x); LazyEyes_GUI_SetSetting("hudY", y)
-    end)
-
-    f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    f.title:SetPoint("TOP", 0, -8); f.title:SetText("LazyEyes"); f.title:SetTextColor(1, 0.82, 0)
-
-    f.closeBtn = CreateFrame("Button", nil, f, "UIPanelCloseButton")
-    f.closeBtn:SetPoint("TOPRIGHT", -2, -2)
-    f.closeBtn:SetScript("OnClick", function() f:Hide(); LazyEyes_GUI_SetSetting("hudVisible", false) end)
-
-    f.statusText = f:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    f.statusText:SetPoint("TOP", f.title, "BOTTOM", 0, -4)
-    f.statusText:SetText("Inactive"); f.statusText:SetTextColor(0.6, 0.6, 0.6)
-
-    f.flashPill = MakePill(f, "Flash", 52, 18, function(v) LazyEyes_GUI_SetSetting("flashScreen", v) end)
-    f.flashPill:SetPoint("TOPLEFT", 16, -40)
-    f.flashPill.isOn = LazyEyes_GUI_GetSetting("flashScreen", true); f.flashPill:UpdateState()
-
-    f.soundPill = MakePill(f, "Sound", 52, 18, function(v) LazyEyes_GUI_SetSetting("playSound", v) end)
-    f.soundPill:SetPoint("LEFT", f.flashPill, "RIGHT", 4, 0)
-    f.soundPill.isOn = LazyEyes_GUI_GetSetting("playSound", true); f.soundPill:UpdateState()
-
-    f.actionBtn = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-    f.actionBtn:SetSize(90, 22); f.actionBtn:SetPoint("BOTTOM", 8, 12)
-    f.actionBtn:SetText("Start Scan")
-    f.actionBtn:SetScript("OnClick", function(self)
-        if LazyEyes.isActive then LazyEyes_StopScanning() self:SetText("Start Scan")
-        else LazyEyes_StartScanning() self:SetText("Stop Scan") end
-    end)
-
-    f.settingsBtn = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-    f.settingsBtn:SetSize(22, 22); f.settingsBtn:SetPoint("RIGHT", f.actionBtn, "LEFT", -4, 0)
-    f.settingsBtn:SetText("S")
-    f.settingsBtn:SetScript("OnEnter", function(self) GameTooltip:SetOwner(self, "ANCHOR_RIGHT"); GameTooltip:SetText("Open Settings"); GameTooltip:Show() end)
-    f.settingsBtn:SetScript("OnLeave", function() GameTooltip:Hide() end)
-    f.settingsBtn:SetScript("OnClick", function() LazyEyes_GUI_Options_Toggle() end)
-
-    if LazyEyes_GUI_GetSetting("hudVisible", true) then f:Show() else f:Hide() end
-    LazyEyes_GUI.hudFrame = f
-end
-
-function LazyEyes_GUI_HUD_UpdateStatus(text, color)
-    if not LazyEyes_GUI.hudFrame then return end
-    LazyEyes_GUI.hudFrame.statusText:SetText(text or "Inactive")
-    if color then LazyEyes_GUI.hudFrame.statusText:SetTextColor(color.r, color.g, color.b)
-    else LazyEyes_GUI.hudFrame.statusText:SetTextColor(0.6, 0.6, 0.6) end
-end
-
-function LazyEyes_GUI_HUD_UpdateButton(isActive)
-    if not LazyEyes_GUI.hudFrame then return end
-    LazyEyes_GUI.hudFrame.actionBtn:SetText(isActive and "Stop Scan" or "Start Scan")
 end
 
 -- =============================================

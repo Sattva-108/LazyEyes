@@ -324,11 +324,6 @@ end
 stateList["DISABLED"] = function()
     RestoreMinimap()
     if GameTooltip:GetAlpha() < 1 then GameTooltip:SetAlpha(1) end
-    -- Update HUD
-    if LazyEyes_GUI_HUD_UpdateStatus then
-        LazyEyes_GUI_HUD_UpdateStatus("Inactive")
-        LazyEyes_GUI_HUD_UpdateButton(false)
-    end
 end
 
 stateList["WAITING"] = function()
@@ -340,11 +335,6 @@ stateList["WAITING"] = function()
         extraDelay = 0
     end
     framesElapsed = 0
-    -- Update HUD
-    if LazyEyes_GUI_HUD_UpdateStatus then
-        LazyEyes_GUI_HUD_UpdateStatus("Scanning...", { r = 0, g = 1, b = 0 })
-        LazyEyes_GUI_HUD_UpdateButton(true)
-    end
 end
 
 stateList["REPOSITION_MINIMAP"] = function()
@@ -359,10 +349,6 @@ stateList["RESET_STATE"] = function()
         foundNode = false
         scanState = "IDLE"
         timeElapsed = 0
-        -- Update HUD with found node name
-        if LazyEyes_GUI_HUD_UpdateStatus and foundNodeName ~= "" then
-            LazyEyes_GUI_HUD_UpdateStatus(foundNodeName .. " Found!", { r = 1, g = 0.82, b = 0 })
-        end
     else
         LazyEyes_SwitchState("WAITING")
     end
@@ -562,10 +548,6 @@ function LazyEyes_StartScanning()
     LazyEyes.isActive = true
     trackingCheckTimer = 0
     if LazyEyes.saveData.settings.zoomMinimap then Minimap:SetZoom(0) end
-    -- Update HUD button
-    if LazyEyes_GUI_HUD_UpdateButton then
-        LazyEyes_GUI_HUD_UpdateButton(true)
-    end
     DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes:|r |cff00ff00Scanning started.|r")
     return true
 end
@@ -576,10 +558,6 @@ function LazyEyes_StopScanning()
     LazyEyes.isActive = false
     LazyEyes._ignoreTrackingWarning = nil
     LazyEyes._ignoreTrackingWarning = false
-    -- Update HUD button
-    if LazyEyes_GUI_HUD_UpdateButton then
-        LazyEyes_GUI_HUD_UpdateButton(false)
-    end
     DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes:|r |cffff2020Scanning stopped.|r")
 end
 
