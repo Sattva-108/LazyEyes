@@ -193,45 +193,53 @@ end
 function MakeSentence(parent, prefix, default, suffix, min, max, step, callback)
     local frame = CreateFrame("Frame", nil, parent)
     frame:SetSize(280, 24)
+
     frame.prefixLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     frame.prefixLabel:SetPoint("LEFT")
     frame.prefixLabel:SetText(prefix)
-    frame.editBox = CreateFrame("EditBox", nil, frame, "InputBoxTemplate")
-    frame.editBox:SetSize(60, 20)
-    frame.editBox:SetPoint("LEFT", frame.prefixLabel, "RIGHT", 8, 0)
-    frame.editBox:SetAutoFocus(false)
-    frame.editBox:SetNumeric(false)
-    frame.editBox:SetMaxLetters(6)
+
+    frame.valueLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    frame.valueLabel:SetPoint("LEFT", frame.prefixLabel, "RIGHT", 6, 0)
+    frame.valueLabel:SetWidth(36)
+    frame.valueLabel:SetJustifyH("RIGHT")
+
+    frame.slider = CreateFrame("Slider", nil, frame, "OptionsSliderTemplate")
+    frame.slider:SetSize(120, 16)
+    frame.slider:SetPoint("LEFT", frame.valueLabel, "RIGHT", 4, 0)
+    frame.slider:SetMinMaxValues(min or 0, max or 100)
+    frame.slider:SetValueStep(step or 1)
+
     frame.suffixLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    frame.suffixLabel:SetPoint("LEFT", frame.editBox, "RIGHT", 8, 0)
+    frame.suffixLabel:SetPoint("LEFT", frame.slider, "RIGHT", 8, 0)
     frame.suffixLabel:SetText(suffix)
+
     frame.value = default or 0
     frame.min = min or 0
     frame.max = max or 100
     frame.step = step or 1
     frame.callback = callback
+
     frame.FormatValue = function(self, val)
         if self.step < 1 then return string.format("%.2f", val) else return tostring(val) end
     end
+
     frame.SetValue = function(self, val)
         val = tonumber(val) or self.value
         val = math.max(self.min, math.min(self.max, val))
         val = math.floor(val / self.step + 0.5) * self.step
         self.value = val
-        self.editBox:SetText(self:FormatValue(val))
+        self.slider:SetValue(val)
+        self.valueLabel:SetText(self:FormatValue(val))
         if self.callback then self.callback(val) end
     end
-    frame.editBox:SetScript("OnEnterPressed", function(self)
-        self:GetParent():SetValue(self:GetText())
-        self:ClearFocus()
+
+    frame.slider:SetScript("OnValueChanged", function(self, val)
+        local parent = self:GetParent()
+        parent.value = val
+        parent.valueLabel:SetText(parent:FormatValue(val))
+        if parent.callback then parent.callback(val) end
     end)
-    frame.editBox:SetScript("OnEscapePressed", function(self)
-        self:SetText(self:GetParent():FormatValue(self:GetParent().value))
-        self:ClearFocus()
-    end)
-    frame.editBox:SetScript("OnEditFocusLost", function(self)
-        self:SetText(self:GetParent():FormatValue(self:GetParent().value))
-    end)
+
     frame:SetValue(default)
     return frame
 end
@@ -378,9 +386,6 @@ function LazyEyes_GUI_ScanTab_Create(parent)
     h:SetPoint("TOP", frame, "TOP", 0, y); h:SetText("Scan Settings"); h:SetTextColor(1, 0.82, 0)
     y = y - 24
 
-    MakeSentence(frame, "Scan every", LazyEyes_GUI_GetSetting("scanInterval", 0.5), "sec", 0.1, 5.0, 0.05, function(v) LazyEyes_GUI_SetSetting("scanInterval", v) end):SetPoint("TOP", frame, "TOP", -30, y)
-    y = y - 28
-
     MakeCheckbox(frame, "Zoom to minimap", LazyEyes_GUI_GetSetting("zoomToMinimap", true), function(v) LazyEyes_GUI_SetSetting("zoomToMinimap", v) end):SetPoint("TOP", frame, "TOP", -80, y)
     y = y - 24
 
@@ -425,6 +430,31 @@ function LazyEyes_GUI_ScanTab_Create(parent)
             end
         end
     end)
+
+    y = y - 28
+    local sh = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    sh:SetPoint("TOP", frame, "TOP", 0, y); sh:SetText("Scan Every"); sh:SetTextColor(1, 0.82, 0)
+    y = y - 22
+
+    local scanVal = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    scanVal:SetPoint("TOP", frame, "TOP", 0, y)
+
+    local scanSlider = CreateFrame("Slider", nil, frame, "OptionsSliderTemplate")
+    scanSlider:SetSize(160, 16)
+    scanSlider:SetPoint("TOP", frame, "TOP", 0, y - 20)
+    scanSlider:SetMinMaxValues(0.1, 5.0)
+    scanSlider:SetValueStep(0.05)
+
+    local scanDefault = LazyEyes_GUI_GetSetting("scanInterval", 0.5)
+    local function UpdateScanLabel(val)
+        scanVal:SetText(string.format("%.2f sec", val))
+    end
+    scanSlider:SetScript("OnValueChanged", function(self, val)
+        UpdateScanLabel(val)
+        LazyEyes_GUI_SetSetting("scanInterval", val)
+    end)
+    scanSlider:SetValue(scanDefault)
+    UpdateScanLabel(scanDefault)
 
     frame:Hide()
     return frame
