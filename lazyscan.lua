@@ -1,11 +1,10 @@
--- LazyEyes.lua
--- Minimal Mining minimap scanner for WoW 3.3.5
--- Based on GatherPro's minimap-scan engine (simplified)
+-- lazyscan.lua
+-- Minimap scanner for WoW 3.3.5
 
-LazyEyes = {}
-LazyEyes.isActive = false
+lazyscan = {}
+lazyscan.isActive = false
 
-local ADDON_NAME = "LazyEyes"
+local ADDON_NAME = "lazyscan"
 local scanState = "DISABLED"
 local timeElapsed = 0
 local framesElapsed = 0
@@ -30,10 +29,10 @@ local function HasActiveTracking()
 end
 
 local function CheckTrackingWarning()
-    if not LazyEyes.isActive or LazyEyes._ignoreTrackingWarning then return end
+    if not lazyscan.isActive or lazyscan._ignoreTrackingWarning then return end
     if not HasActiveTracking() then
-        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes:|r No mining or herb tracking active! |Hlazyeys:stop|h|cff00ccff[Stop scan]|h|r |Hlazyeys:ignore|h|cff00ccff[Ignore]|h|r")
-        local snd = LazyEyes.saveData and LazyEyes.saveData.settings and LazyEyes.saveData.settings.trackingSoundID
+        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00lazyscan:|r No mining or herb tracking active! |Hlazyscan:stop|h|cff00ccff[Stop scan]|h|r |Hlazyscan:ignore|h|cff00ccff[Ignore]|h|r")
+        local snd = lazyscan.saveData and lazyscan.saveData.settings and lazyscan.saveData.settings.trackingSoundID
         if snd then PlaySound(snd, "Master") end
     end
 end
@@ -100,8 +99,8 @@ flashFrame:SetScript("OnUpdate", function(self, elapsed)
 end)
 
 local function FlashScreen()
-    local c = LazyEyes.saveData and LazyEyes.saveData.settings
-        and LazyEyes.saveData.settings.flashColor or { r = 0, g = 1, b = 0, a = 0.5 }
+    local c = lazyscan.saveData and lazyscan.saveData.settings
+        and lazyscan.saveData.settings.flashColor or { r = 0, g = 1, b = 0, a = 0.5 }
     flashTexture:SetVertexColor(c.r, c.g, c.b, c.a or 0.6)
     flashFrame:Show()
     isFlashing = true
@@ -109,11 +108,11 @@ local function FlashScreen()
 end
 
 local function PlayAlertSound()
-    local s = LazyEyes.saveData
+    local s = lazyscan.saveData
     local soundIndex = s and s.settings and s.settings.soundEffect or 1
     local soundId = 891
-    if LazyEyes_SoundEffects and LazyEyes_SoundEffects[soundIndex] then
-        soundId = LazyEyes_SoundEffects[soundIndex].id
+    if lazyscan_SoundEffects and lazyscan_SoundEffects[soundIndex] then
+        soundId = lazyscan_SoundEffects[soundIndex].id
     end
     PlaySound(soundId, "Master")
 end
@@ -128,7 +127,7 @@ local mouselookActive = false
 -- OnUpdate frame to detect button state (bypasses frame event capture)
 local mouseReleaseFrame = CreateFrame("Frame")
 mouseReleaseFrame:SetScript("OnUpdate", function()
-    if not LazyEyes.isActive or (UnitAffectingCombat and UnitAffectingCombat("player")) then
+    if not lazyscan.isActive or (UnitAffectingCombat and UnitAffectingCombat("player")) then
         if mouselookActive then
             if IsMouselooking() then MouselookStop() end
             mouselookActive = false
@@ -166,7 +165,7 @@ local function HookMinimap()
 
     Minimap:SetScript("OnMouseDown", function(self, button)
         local inCombat = UnitAffectingCombat and UnitAffectingCombat("player")
-        if LazyEyes.isActive and not inCombat and button == "RightButton" and Minimap:GetScale() < 0.5 then
+        if lazyscan.isActive and not inCombat and button == "RightButton" and Minimap:GetScale() < 0.5 then
             return
         end
         if origOnMouseDown then return origOnMouseDown(self, button) end
@@ -174,7 +173,7 @@ local function HookMinimap()
 
     Minimap:SetScript("OnMouseUp", function(self, button)
         local inCombat = UnitAffectingCombat and UnitAffectingCombat("player")
-        if LazyEyes.isActive and not inCombat and button == "RightButton" and Minimap:GetScale() < 0.5 then
+        if lazyscan.isActive and not inCombat and button == "RightButton" and Minimap:GetScale() < 0.5 then
             return
         end
         if origOnMouseUp then return origOnMouseUp(self, button) end
@@ -239,7 +238,7 @@ end
 -- CURSOR GUARD (prevent false alerts over GUI)
 -- =============================================
 local function CursorBusy()
-    return LazyEyes_GUI and LazyEyes_GUI.nodeHovered
+    return lazyscan_GUI and lazyscan_GUI.nodeHovered
 end
 
 -- =============================================
@@ -295,7 +294,7 @@ local function IsMatch()
                     end
                     if matched then
                         -- Check if this node is enabled in GUI (always use English name)
-                        if LazyEyes_GUI_IsNodeEnabled("ores", node.en) then
+                        if lazyscan_GUI_IsNodeEnabled("ores", node.en) then
                             foundNodeName = matchedName
                             return true
                         end
@@ -314,7 +313,7 @@ local mainFrame = CreateFrame("Frame")
 
 local stateList = {}
 
-function LazyEyes_SwitchState(newState)
+function lazyscan_SwitchState(newState)
     if stateList[newState] then
         scanState = newState
         stateList[newState]()
@@ -350,7 +349,7 @@ stateList["RESET_STATE"] = function()
         scanState = "IDLE"
         timeElapsed = 0
     else
-        LazyEyes_SwitchState("WAITING")
+        lazyscan_SwitchState("WAITING")
     end
 end
 
@@ -375,22 +374,22 @@ local function ScanUpdate(self, elapsed)
     if trackingCheckTimer >= 60 then
         trackingCheckTimer = 0
         CheckTrackingWarning()
-        if LazyEyes.saveData.settings.zoomMinimap then Minimap:SetZoom(0) end
+        if lazyscan.saveData.settings.zoomMinimap then Minimap:SetZoom(0) end
     end
 
     if scanState == "WAITING" then
         timeElapsed = timeElapsed + elapsed
         local interval = 0.5
-        local inCombat = LazyEyes.saveData.settings.pauseInCombat and UnitAffectingCombat("player")
+        local inCombat = lazyscan.saveData.settings.pauseInCombat and UnitAffectingCombat("player")
         if timeElapsed >= interval and not IsMouselooking() and not IsMouseButtonDown(1) and not inCombat and not CursorBusy() then
-            LazyEyes_SwitchState("REPOSITION_MINIMAP")
+            lazyscan_SwitchState("REPOSITION_MINIMAP")
         end
 
     elseif scanState == "REPOSITION_MINIMAP" then
         if GetUnitSpeed("player") ~= 0 then
-            LazyEyes_SwitchState("TOOLTIP_CHECK")
+            lazyscan_SwitchState("TOOLTIP_CHECK")
         else
-            LazyEyes_SwitchState("WAITING")
+            lazyscan_SwitchState("WAITING")
         end
 
     elseif scanState == "TOOLTIP_CHECK" then
@@ -416,27 +415,27 @@ local function ScanUpdate(self, elapsed)
 
         -- Frame 3+: check tooltip text
         if CursorBusy() then
-            LazyEyes_SwitchState("RESET_STATE")
+            lazyscan_SwitchState("RESET_STATE")
         elseif IsMatch() then
             -- Node found! Flash + sound
-            if LazyEyes.saveData.settings.flashScreen then FlashScreen() end
-            if LazyEyes.saveData.settings.playSound then PlayAlertSound() end
+            if lazyscan.saveData.settings.flashScreen then FlashScreen() end
+            if lazyscan.saveData.settings.playSound then PlayAlertSound() end
             if FlashClientIcon then FlashClientIcon() end
-            DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes:|r Found " .. foundNodeName .. "!")
+            DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00lazyscan:|r Found " .. foundNodeName .. "!")
             foundNode = true
-            LazyEyes_SwitchState("RESET_STATE")
+            lazyscan_SwitchState("RESET_STATE")
         else
             framesElapsed = framesElapsed + 1
             if framesElapsed >= 3 then
-                LazyEyes_SwitchState("RESET_STATE")
+                lazyscan_SwitchState("RESET_STATE")
             end
         end
 
     elseif scanState == "IDLE" then
         timeElapsed = timeElapsed + elapsed
-        local rd = LazyEyes.saveData.settings.restartDelay or 5
+        local rd = lazyscan.saveData.settings.restartDelay or 5
         if timeElapsed >= rd then
-            LazyEyes_SwitchState("WAITING")
+            lazyscan_SwitchState("WAITING")
         end
     end
 end
@@ -448,22 +447,22 @@ mainFrame:SetScript("OnEvent", function(self, event, ...)
     if event == "ADDON_LOADED" then
         local addonName = ...
         if addonName == ADDON_NAME then
-            if not LazyEyesSavedVars then
-                LazyEyesSavedVars = LazyEyes_GetDefaultSettings()
+            if not lazyscanSavedVars then
+                lazyscanSavedVars = lazyscan_GetDefaultSettings()
             end
-            LazyEyes.saveData = { settings = LazyEyesSavedVars }
+            lazyscan.saveData = { settings = lazyscanSavedVars }
             -- Ensure all keys exist
-            for k, v in pairs(LazyEyes_GetDefaultSettings()) do
-                if LazyEyes.saveData.settings[k] == nil then
-                    LazyEyes.saveData.settings[k] = v
+            for k, v in pairs(lazyscan_GetDefaultSettings()) do
+                if lazyscan.saveData.settings[k] == nil then
+                    lazyscan.saveData.settings[k] = v
                 end
             end
 
-            trackingList = LazyEyes_BuildTrackingList()
+            trackingList = lazyscan_BuildTrackingList()
             
             -- Initialize GUI
-            if LazyEyes_GUI_Init then
-                LazyEyes_GUI_Init()
+            if lazyscan_GUI_Init then
+                lazyscan_GUI_Init()
             end
 
             -- Minimap button via LibDBIcon
@@ -471,24 +470,24 @@ mainFrame:SetScript("OnEvent", function(self, event, ...)
                 local LDB = LibStub("LibDataBroker-1.1", true)
                 local DBI = LibStub("LibDBIcon-1.0", true)
                 if LDB and DBI then
-                    local minimapIcon = LDB:NewDataObject("LazyEyes", {
+                    local minimapIcon = LDB:NewDataObject("lazyscan", {
                         type = "data source",
-                        text = "LazyEyes",
+                        text = "lazyscan",
                         icon = "Interface\\Icons\\INV_Ore_Iron_01",
                         OnClick = function(self, button)
                             if button == "LeftButton" then
-                                if LazyEyes_GUI_Options_Toggle then
-                                    LazyEyes_GUI_Options_Toggle()
+                                if lazyscan_GUI_Options_Toggle then
+                                    lazyscan_GUI_Options_Toggle()
                                 end
                             elseif button == "RightButton" then
-                                if LazyEyes.isActive then
-                                    LazyEyes_StopScanning()
+                                if lazyscan.isActive then
+                                    lazyscan_StopScanning()
                                 else
-                                    LazyEyes_StartScanning()
+                                    lazyscan_StartScanning()
                                 end
-                                DBI:Refresh("LazyEyes")
+                                DBI:Refresh("lazyscan")
                                 -- Force tooltip update if visible
-                                local icon = DBI.objects and DBI.objects["LazyEyes"]
+                                local icon = DBI.objects and DBI.objects["lazyscan"]
                                 if icon then
                                     if icon:IsMouseOver() then
                                         icon:GetScript("OnEnter")(icon)
@@ -499,8 +498,8 @@ mainFrame:SetScript("OnEvent", function(self, event, ...)
                             end
                         end,
                         OnTooltipShow = function(tooltip)
-                            tooltip:AddLine("|cff00ff00LazyEyes Mining|r")
-                            if LazyEyes.isActive then
+                            tooltip:AddLine("|cff00ff00lazyscan|r")
+                            if lazyscan.isActive then
                                 tooltip:AddLine("|cff00ff00Scan Active|r")
                             else
                                 tooltip:AddLine("|cffff2020Scan Disabled|r")
@@ -510,20 +509,20 @@ mainFrame:SetScript("OnEvent", function(self, event, ...)
                             tooltip:AddLine("|cff00ccffRight-click|r: Toggle scan")
                         end,
                     })
-                    DBI:Register("LazyEyes", minimapIcon, LazyEyes.saveData.settings)
+                    DBI:Register("lazyscan", minimapIcon, lazyscan.saveData.settings)
                 end
             end
             
-            DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes Mining|r v1.0 loaded! Type |cff00ccff/leye|r to toggle.")
+            DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00lazyscan|r v1.0 loaded! Type |cff00ccff/lazyscan|r to toggle.")
         end
 
     elseif event == "PLAYER_ENTERING_WORLD" then
-        if LazyEyes.saveData and LazyEyes.saveData.settings.autoStartScan and not LazyEyes.isActive then
-            LazyEyes_StartScanning()
+        if lazyscan.saveData and lazyscan.saveData.settings.autoStartScan and not lazyscan.isActive then
+            lazyscan_StartScanning()
         end
 
     elseif event == "PLAYER_LOGOUT" then
-        LazyEyesSavedVars = LazyEyes.saveData and LazyEyes.saveData.settings
+        lazyscanSavedVars = lazyscan.saveData and lazyscan.saveData.settings
     end
 end)
 
@@ -534,54 +533,54 @@ mainFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 -- =============================================
 -- START / STOP
 -- =============================================
-function LazyEyes_StartScanning()
-    if not LazyEyes.saveData then return false end
-    trackingList = LazyEyes_BuildTrackingList()
+function lazyscan_StartScanning()
+    if not lazyscan.saveData then return false end
+    trackingList = lazyscan_BuildTrackingList()
 
     -- Check if Find Minerals or Find Herbs tracking is active
-    if not HasActiveTracking() and not LazyEyes._ignoreTrackingWarning then
-        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes:|r No mining or herb tracking active! |Hlazyeys:stop|h|cff00ccff[Stop scan]|h|r |Hlazyeys:ignore|h|cff00ccff[Ignore]|h|r")
+    if not HasActiveTracking() and not lazyscan._ignoreTrackingWarning then
+        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00lazyscan:|r No mining or herb tracking active! |Hlazyscan:stop|h|cff00ccff[Stop scan]|h|r |Hlazyscan:ignore|h|cff00ccff[Ignore]|h|r")
     end
 
-    LazyEyes_SwitchState("WAITING")
+    lazyscan_SwitchState("WAITING")
     mainFrame:SetScript("OnUpdate", ScanUpdate)
-    LazyEyes.isActive = true
+    lazyscan.isActive = true
     trackingCheckTimer = 0
-    if LazyEyes.saveData.settings.zoomMinimap then Minimap:SetZoom(0) end
-    DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes:|r |cff00ff00Scanning started.|r")
+    if lazyscan.saveData.settings.zoomMinimap then Minimap:SetZoom(0) end
+    DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00lazyscan:|r |cff00ff00Scanning started.|r")
     return true
 end
 
-function LazyEyes_StopScanning()
-    LazyEyes_SwitchState("DISABLED")
+function lazyscan_StopScanning()
+    lazyscan_SwitchState("DISABLED")
     mainFrame:SetScript("OnUpdate", nil)
-    LazyEyes.isActive = false
-    LazyEyes._ignoreTrackingWarning = nil
-    LazyEyes._ignoreTrackingWarning = false
-    DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes:|r |cffff2020Scanning stopped.|r")
+    lazyscan.isActive = false
+    lazyscan._ignoreTrackingWarning = nil
+    lazyscan._ignoreTrackingWarning = false
+    DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00lazyscan:|r |cffff2020Scanning stopped.|r")
 end
 
 -- =============================================
 -- SLASH COMMANDS
 -- =============================================
-SLASH_LAZYEYES1 = "/leye"
-SLASH_LAZYEYES2 = "/lazyeyes"
+SLASH_LAZYSCAN1 = "/lazyscan"
+SLASH_LAZYSCAN2 = "/lscan"
 
-SlashCmdList["LAZYEYES"] = function(msg)
+SlashCmdList["LAZYSCAN"] = function(msg)
     local cmd = string.lower(msg or "")
     if cmd == "start" then
-        LazyEyes_StartScanning()
+        lazyscan_StartScanning()
     elseif cmd == "stop" then
-        LazyEyes_StopScanning()
+        lazyscan_StopScanning()
     elseif cmd == "test" then
-        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes:|r Testing alerts...")
-        if LazyEyes.saveData.settings.flashScreen then FlashScreen() end
-        if LazyEyes.saveData.settings.playSound then PlayAlertSound() end
+        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00lazyscan:|r Testing alerts...")
+        if lazyscan.saveData.settings.flashScreen then FlashScreen() end
+        if lazyscan.saveData.settings.playSound then PlayAlertSound() end
     else
-        if LazyEyes.isActive then
-            LazyEyes_StopScanning()
+        if lazyscan.isActive then
+            lazyscan_StopScanning()
         else
-            LazyEyes_StartScanning()
+            lazyscan_StartScanning()
         end
     end
 end
@@ -589,28 +588,28 @@ end
 -- =============================================
 -- SLASH COMMAND: /lgui
 -- =============================================
-SLASH_LAZYEYESGUI1 = "/lgui"
+SLASH_LAZYSCANGUI1 = "/lgui"
 
-SlashCmdList["LAZYEYESGUI"] = function()
-    if LazyEyes_GUI_Options_Toggle then
-        LazyEyes_GUI_Options_Toggle()
+SlashCmdList["LAZYSCANGUI"] = function()
+    if lazyscan_GUI_Options_Toggle then
+        lazyscan_GUI_Options_Toggle()
     else
-        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes:|r GUI not loaded yet.")
+        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00lazyscan:|r GUI not loaded yet.")
     end
 end
 
 -- =============================================
 -- KEYBIND
 -- =============================================
-BINDING_HEADER_LAZYEYES = "LazyEyes"
-BINDING_NAME_LAZYEYES_TOGGLE = "Toggle Mining Scanner"
+BINDING_HEADER_LAZYSCAN = "lazyscan"
+BINDING_NAME_LAZYSCAN_TOGGLE = "Toggle Scanner"
 
-_G["SLASH_LAZYEYES1"] = "/leye"
-SlashCmdList["LAZYEYES"] = function(msg)
-    if LazyEyes.isActive then
-        LazyEyes_StopScanning()
+_G["SLASH_LAZYSCAN1"] = "/leye"
+SlashCmdList["LAZYSCAN"] = function(msg)
+    if lazyscan.isActive then
+        lazyscan_StopScanning()
     else
-        LazyEyes_StartScanning()
+        lazyscan_StartScanning()
     end
 end
 
@@ -619,13 +618,13 @@ end
 -- =============================================
 local origSetItemRef = SetItemRef
 function SetItemRef(link, text, button, chatFrame)
-    local command = link:match("^lazyeys:(.+)$")
+    local command = link:match("^lazyscan:(.+)$")
     if command == "stop" then
-        LazyEyes_StopScanning()
+        lazyscan_StopScanning()
         return
     elseif command == "ignore" then
-        LazyEyes._ignoreTrackingWarning = true
-        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes:|r Tracking warning silenced for this session.")
+        lazyscan._ignoreTrackingWarning = true
+        DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00lazyscan:|r Tracking warning silenced for this session.")
         return
     end
     return origSetItemRef(link, text, button, chatFrame)

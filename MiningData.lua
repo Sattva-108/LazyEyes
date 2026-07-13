@@ -5,7 +5,7 @@
 -- Each node: { skillRequired, yellowAt, greenAt, grayAt, ru = "Russian Name" }
 -- Tooltip matching checks both English and Russian names.
 
-LazyEyes_MiningData = {
+lazyscan_MiningData = {
     -- Classic
     ["Copper Vein"] = {
         skillRequired = 1, yellowAt = 25, greenAt = 50, grayAt = 100,
@@ -127,7 +127,7 @@ LazyEyes_MiningData = {
 local MINING_SKILL_NAMES = { "Mining", "Горное дело" }
 
 -- Get Mining skill level (nil if not learned)
-function LazyEyes_GetMiningSkill()
+function lazyscan_GetMiningSkill()
     if GetNumSkillLines and GetSkillLineInfo then
         if ExpandSkillHeader then
             for i = GetNumSkillLines(), 1, -1 do
@@ -148,8 +148,8 @@ function LazyEyes_GetMiningSkill()
 end
 
 -- Difficulty tier of a node for the player's Mining skill
-function LazyEyes_NodeTier(data)
-    local skill = LazyEyes_GetMiningSkill()
+function lazyscan_NodeTier(data)
+    local skill = lazyscan_GetMiningSkill()
     if not skill or not data then return "unknown" end
     if skill < data.skillRequired then return "red" end
     if skill < data.yellowAt then return "orange" end
@@ -159,9 +159,9 @@ function LazyEyes_NodeTier(data)
 end
 
 -- Build tracking list: returns { { en="Copper Vein", ru="Медная жила" }, ... }
-function LazyEyes_BuildTrackingList()
+function lazyscan_BuildTrackingList()
     local list = {}
-    for enName, info in pairs(LazyEyes_MiningData) do
+    for enName, info in pairs(lazyscan_MiningData) do
         table.insert(list, {
             en = enName,
             ru = info.ru or enName,

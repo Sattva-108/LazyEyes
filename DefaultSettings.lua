@@ -1,7 +1,7 @@
 -- DefaultSettings.lua
--- Defaults for LazyEyes Mining
+-- Defaults for lazyscan
 
-function LazyEyes_GetDefaultSettings()
+function lazyscan_GetDefaultSettings()
     return {
         -- Scan settings
         scanInterval = 0.5,
@@ -14,11 +14,11 @@ function LazyEyes_GetDefaultSettings()
         zoomMinimap = true,
         trackingSound = 5,
         trackingSoundID = 12867,
-        
+
         -- GUI settings
         flashColor = { r = 0, g = 1, b = 0, a = 0.5 },
         soundID = 891,
-        
+
         -- Node toggles (ores and herbs)
         enabledNodes = {
             ores = {},
@@ -27,14 +27,14 @@ function LazyEyes_GetDefaultSettings()
     }
 end
 
-LazyEyes_SoundEffects = {
+lazyscan_SoundEffects = {
     { name = "Coin (Default)", id = 891 },
     { name = "Quest Complete", id = 878 },
     { name = "Level Up", id = 888 },
     { name = "Loot Coin", id = 120 },
 }
 
-LazyEyes_WarningSounds = {
+lazyscan_WarningSounds = {
     { name = "Raid Warning", id = 8959 },
     { name = "Ready Check", id = 8960 },
     { name = "PvP Flag", id = 8174 },

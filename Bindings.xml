@@ -1,9 +1,9 @@
 <Bindings>
-    <Binding name="LAZYEYES_TOGGLE" header="LAZYEYES">
-        if LazyEyes.isActive then
-            LazyEyes_StopScanning()
+    <Binding name="LAZYSCAN_TOGGLE" header="LAZYSCAN">
+        if lazyscan.isActive then
+            lazyscan_StopScanning()
         else
-            LazyEyes_StartScanning()
+            lazyscan_StartScanning()
         end
     </Binding>
 </Bindings>

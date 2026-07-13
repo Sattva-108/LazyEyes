@@ -1,5 +1,5 @@
 -- GUI.lua
--- Complete GUI for LazyEyes Mining (WoW 3.3.5 compatible)
+-- Complete GUI for lazyscan (WoW 3.3.5 compatible)
 
 -- =============================================
 -- NODE DATABASE (from GatherMate)
@@ -7,7 +7,7 @@
 -- { name, nameRu, skillRequired, expansion }
 -- expansion: "classic", "tbc", "wotlk"
 
-LazyEyes_OreData = {
+lazyscan_OreData = {
     { name = "Copper Vein", nameRu = "Медная жила", skill = 1, exp = "classic" },
     { name = "Tin Vein", nameRu = "Оловянная жила", skill = 65, exp = "classic" },
     { name = "Silver Vein", nameRu = "Серебряная жила", skill = 75, exp = "classic" },
@@ -39,7 +39,7 @@ LazyEyes_OreData = {
     { name = "Titanium Vein", nameRu = "Залежи титана", skill = 450, exp = "wotlk" },
 }
 
-LazyEyes_HerbData = {
+lazyscan_HerbData = {
     { name = "Peacebloom", nameRu = "Мироцвет", skill = 1, exp = "classic" },
     { name = "Silverleaf", nameRu = "Сребролист", skill = 1, exp = "classic" },
     { name = "Earthroot", nameRu = "Земляной корень", skill = 15, exp = "classic" },
@@ -90,62 +90,62 @@ LazyEyes_HerbData = {
 }
 
 -- Sort by skill requirement
-table.sort(LazyEyes_OreData, function(a, b) return a.skill < b.skill end)
-table.sort(LazyEyes_HerbData, function(a, b) return a.skill < b.skill end)
+table.sort(lazyscan_OreData, function(a, b) return a.skill < b.skill end)
+table.sort(lazyscan_HerbData, function(a, b) return a.skill < b.skill end)
 
 -- =============================================
 -- MODULE INIT
 -- =============================================
-LazyEyes_GUI = {}
-LazyEyes_GUI.saveData = nil
-LazyEyes_GUI.optionsFrame = nil
+lazyscan_GUI = {}
+lazyscan_GUI.saveData = nil
+lazyscan_GUI.optionsFrame = nil
 
-function LazyEyes_GUI_Init()
-    LazyEyes_GUI.saveData = LazyEyes.saveData
+function lazyscan_GUI_Init()
+    lazyscan_GUI.saveData = lazyscan.saveData
     -- Ensure enabledNodes has both ores and herbs
-    local nodes = LazyEyes_GUI_GetSetting("enabledNodes", {})
+    local nodes = lazyscan_GUI_GetSetting("enabledNodes", {})
     if not nodes.ores then nodes.ores = {} end
     if not nodes.herbs then nodes.herbs = {} end
     -- Initialize ore toggles
-    for _, ore in ipairs(LazyEyes_OreData) do
+    for _, ore in ipairs(lazyscan_OreData) do
         if nodes.ores[ore.name] == nil then nodes.ores[ore.name] = true end
     end
     -- Initialize herb toggles
-    for _, herb in ipairs(LazyEyes_HerbData) do
+    for _, herb in ipairs(lazyscan_HerbData) do
         if nodes.herbs[herb.name] == nil then nodes.herbs[herb.name] = true end
     end
-    LazyEyes_GUI_SetSetting("enabledNodes", nodes)
-    LazyEyes_GUI_Options_Create()
-    LazyEyes_GUI_Options_RegisterBlizzard()
+    lazyscan_GUI_SetSetting("enabledNodes", nodes)
+    lazyscan_GUI_Options_Create()
+    lazyscan_GUI_Options_RegisterBlizzard()
 end
 
-function LazyEyes_GUI_GetSetting(key, default)
-    if LazyEyes_GUI.saveData and LazyEyes_GUI.saveData.settings then
-        local val = LazyEyes_GUI.saveData.settings[key]
+function lazyscan_GUI_GetSetting(key, default)
+    if lazyscan_GUI.saveData and lazyscan_GUI.saveData.settings then
+        local val = lazyscan_GUI.saveData.settings[key]
         if val ~= nil then return val end
     end
     return default
 end
 
-function LazyEyes_GUI_SetSetting(key, value)
-    if LazyEyes_GUI.saveData and LazyEyes_GUI.saveData.settings then
-        LazyEyes_GUI.saveData.settings[key] = value
+function lazyscan_GUI_SetSetting(key, value)
+    if lazyscan_GUI.saveData and lazyscan_GUI.saveData.settings then
+        lazyscan_GUI.saveData.settings[key] = value
     end
 end
 
-function LazyEyes_GUI_IsNodeEnabled(category, nodeName)
-    local nodes = LazyEyes_GUI_GetSetting("enabledNodes", {})
+function lazyscan_GUI_IsNodeEnabled(category, nodeName)
+    local nodes = lazyscan_GUI_GetSetting("enabledNodes", {})
     if nodes[category] then
         return nodes[category][nodeName] == true
     end
     return true
 end
 
-function LazyEyes_GUI_SetNodeEnabled(category, nodeName, enabled)
-    local nodes = LazyEyes_GUI_GetSetting("enabledNodes", {})
+function lazyscan_GUI_SetNodeEnabled(category, nodeName, enabled)
+    local nodes = lazyscan_GUI_GetSetting("enabledNodes", {})
     if not nodes[category] then nodes[category] = {} end
     nodes[category][nodeName] = enabled
-    LazyEyes_GUI_SetSetting("enabledNodes", nodes)
+    lazyscan_GUI_SetSetting("enabledNodes", nodes)
 end
 
 -- =============================================
@@ -261,7 +261,7 @@ end
 -- =============================================
 -- TABS
 -- =============================================
-function LazyEyes_GUI_Tabs_Create(parent, tabs, yOffset)
+function lazyscan_GUI_Tabs_Create(parent, tabs, yOffset)
     local tabGroup = { tabs = tabs, buttons = {}, activeKey = tabs[1].key }
     local TAB_W, TAB_H = 90, 22
     local totalW = #tabs * TAB_W + (#tabs - 1) * 2
@@ -299,7 +299,7 @@ end
 -- =============================================
 -- SCAN TAB
 -- =============================================
-function LazyEyes_GUI_ScanTab_Create(parent)
+function lazyscan_GUI_ScanTab_Create(parent)
     local frame = CreateFrame("Frame", nil, parent)
     frame:SetAllPoints()
     local y = -8
@@ -308,10 +308,10 @@ function LazyEyes_GUI_ScanTab_Create(parent)
     h:SetPoint("TOP", frame, "TOP", 0, y); h:SetText("Scan Settings"); h:SetTextColor(1, 0.82, 0)
     y = y - 24
 
-    MakeCheckbox(frame, "Auto start on login", LazyEyes_GUI_GetSetting("autoStartScan", true), function(v) LazyEyes_GUI_SetSetting("autoStartScan", v) end):SetPoint("TOP", frame, "TOP", -80, y)
+    MakeCheckbox(frame, "Auto start on login", lazyscan_GUI_GetSetting("autoStartScan", true), function(v) lazyscan_GUI_SetSetting("autoStartScan", v) end):SetPoint("TOP", frame, "TOP", -80, y)
     y = y - 24
 
-    local zoomCb = MakeCheckbox(frame, "Zoom out minimap on scan", LazyEyes_GUI_GetSetting("zoomMinimap", true), function(v) LazyEyes_GUI_SetSetting("zoomMinimap", v) end)
+    local zoomCb = MakeCheckbox(frame, "Zoom out minimap on scan", lazyscan_GUI_GetSetting("zoomMinimap", true), function(v) lazyscan_GUI_SetSetting("zoomMinimap", v) end)
     zoomCb:SetPoint("TOP", frame, "TOP", -80, y)
     zoomCb:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
@@ -340,7 +340,7 @@ function LazyEyes_GUI_ScanTab_Create(parent)
     }
 
     local function UpdateBindText()
-        local key = GetBindingKey("LAZYEYES_TOGGLE")
+        local key = GetBindingKey("LAZYSCAN_TOGGLE")
         if key and key ~= "" then
             btn:SetText(GetBindingText(key, "KEY_"))
         else
@@ -373,14 +373,14 @@ function LazyEyes_GUI_ScanTab_Create(parent)
         self:UnlockHighlight()
 
         if keyPressed == "" then
-            local bound = GetBindingKey("LAZYEYES_TOGGLE")
+            local bound = GetBindingKey("LAZYSCAN_TOGGLE")
             if bound then SetBinding(bound) end
         else
             local oldAction = GetBindingAction(keyPressed)
-            if oldAction ~= "" and oldAction ~= "LAZYEYES_TOGGLE" then
-                DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyEyes:|r Key was bound to " .. GetBindingText(oldAction, "BINDING_NAME_"))
+            if oldAction ~= "" and oldAction ~= "LAZYSCAN_TOGGLE" then
+                DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00lazyscan:|r Key was bound to " .. GetBindingText(oldAction, "BINDING_NAME_"))
             end
-            SetBinding(keyPressed, "LAZYEYES_TOGGLE")
+            SetBinding(keyPressed, "LAZYSCAN_TOGGLE")
         end
         SaveBindings(GetCurrentBindingSet())
         UpdateBindText()
@@ -424,13 +424,13 @@ function LazyEyes_GUI_ScanTab_Create(parent)
     scanSlider:SetMinMaxValues(0.1, 5.0)
     scanSlider:SetValueStep(0.05)
 
-    local scanDefault = LazyEyes_GUI_GetSetting("scanInterval", 0.5)
+    local scanDefault = lazyscan_GUI_GetSetting("scanInterval", 0.5)
     local function UpdateScanLabel(val)
         scanVal:SetText(string.format("%.2f sec", val))
     end
     scanSlider:SetScript("OnValueChanged", function(self, val)
         UpdateScanLabel(val)
-        LazyEyes_GUI_SetSetting("scanInterval", val)
+        lazyscan_GUI_SetSetting("scanInterval", val)
     end)
     scanSlider:SetValue(scanDefault)
     UpdateScanLabel(scanDefault)
@@ -442,7 +442,7 @@ end
 -- =============================================
 -- ALERTS TAB
 -- =============================================
-function LazyEyes_GUI_AlertsTab_Create(parent)
+function lazyscan_GUI_AlertsTab_Create(parent)
     local frame = CreateFrame("Frame", nil, parent)
     frame:SetAllPoints()
     local y = -8
@@ -451,10 +451,10 @@ function LazyEyes_GUI_AlertsTab_Create(parent)
     h:SetPoint("TOP", frame, "TOP", 0, y); h:SetText("Alert Settings"); h:SetTextColor(1, 0.82, 0)
     y = y - 24
 
-    MakeCheckbox(frame, "Flash screen", LazyEyes_GUI_GetSetting("flashScreen", true), function(v) LazyEyes_GUI_SetSetting("flashScreen", v) end):SetPoint("TOP", frame, "TOP", -80, y)
+    MakeCheckbox(frame, "Flash screen", lazyscan_GUI_GetSetting("flashScreen", true), function(v) lazyscan_GUI_SetSetting("flashScreen", v) end):SetPoint("TOP", frame, "TOP", -80, y)
     y = y - 24
 
-    MakeCheckbox(frame, "Play sound", LazyEyes_GUI_GetSetting("playSound", true), function(v) LazyEyes_GUI_SetSetting("playSound", v) end):SetPoint("TOP", frame, "TOP", -80, y)
+    MakeCheckbox(frame, "Play sound", lazyscan_GUI_GetSetting("playSound", true), function(v) lazyscan_GUI_SetSetting("playSound", v) end):SetPoint("TOP", frame, "TOP", -80, y)
     y = y - 28
 
     local ch = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -494,7 +494,7 @@ function LazyEyes_GUI_AlertsTab_Create(parent)
     end
 
     do
-        local fc = LazyEyes_GUI_GetSetting("flashColor", { r = 0, g = 1, b = 0, a = 0.5 })
+        local fc = lazyscan_GUI_GetSetting("flashColor", { r = 0, g = 1, b = 0, a = 0.5 })
         pickerR, pickerG, pickerB, pickerA = fc.r, fc.g, fc.b, fc.a or 1
         UpdateSwatch()
     end
@@ -514,7 +514,7 @@ function LazyEyes_GUI_AlertsTab_Create(parent)
             local a = 1 - OpacitySliderFrame:GetValue()
             pickerR, pickerG, pickerB, pickerA = r, g, b, a
             UpdateSwatch()
-            LazyEyes_GUI_SetSetting("flashColor", { r = r, g = g, b = b, a = a })
+            lazyscan_GUI_SetSetting("flashColor", { r = r, g = g, b = b, a = a })
         end
 
         ColorPickerFrame.opacityFunc = function()
@@ -522,13 +522,13 @@ function LazyEyes_GUI_AlertsTab_Create(parent)
             local a = 1 - OpacitySliderFrame:GetValue()
             pickerR, pickerG, pickerB, pickerA = r, g, b, a
             UpdateSwatch()
-            LazyEyes_GUI_SetSetting("flashColor", { r = r, g = g, b = b, a = a })
+            lazyscan_GUI_SetSetting("flashColor", { r = r, g = g, b = b, a = a })
         end
 
         ColorPickerFrame.cancelFunc = function()
             pickerR, pickerG, pickerB, pickerA = savedR, savedG, savedB, savedA
             UpdateSwatch()
-            LazyEyes_GUI_SetSetting("flashColor", { r = savedR, g = savedG, b = savedB, a = savedA })
+            lazyscan_GUI_SetSetting("flashColor", { r = savedR, g = savedG, b = savedB, a = savedA })
         end
 
         ShowUIPanel(ColorPickerFrame)
@@ -542,17 +542,17 @@ function LazyEyes_GUI_AlertsTab_Create(parent)
     sh:SetPoint("TOP", frame, "TOP", 0, y); sh:SetText("Node Found Sound"); sh:SetTextColor(1, 0.82, 0)
     y = y - 24
 
-    local si = LazyEyes_GUI_GetSetting("soundEffect", 1)
+    local si = lazyscan_GUI_GetSetting("soundEffect", 1)
     local sndBtn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
     sndBtn:SetSize(200, 22); sndBtn:SetPoint("TOP", frame, "TOP", 0, y)
-    sndBtn:SetText(LazyEyes_SoundEffects[si] and LazyEyes_SoundEffects[si].name or "Coin")
+    sndBtn:SetText(lazyscan_SoundEffects[si] and lazyscan_SoundEffects[si].name or "Coin")
     sndBtn:SetScript("OnClick", function(self)
         si = si + 1
-        if si > #LazyEyes_SoundEffects then si = 1 end
-        self:SetText(LazyEyes_SoundEffects[si].name)
-        LazyEyes_GUI_SetSetting("soundEffect", si)
-        LazyEyes_GUI_SetSetting("soundID", LazyEyes_SoundEffects[si].id)
-        PlaySound(LazyEyes_SoundEffects[si].id, "Master")
+        if si > #lazyscan_SoundEffects then si = 1 end
+        self:SetText(lazyscan_SoundEffects[si].name)
+        lazyscan_GUI_SetSetting("soundEffect", si)
+        lazyscan_GUI_SetSetting("soundID", lazyscan_SoundEffects[si].id)
+        PlaySound(lazyscan_SoundEffects[si].id, "Master")
     end)
     y = y - 32
 
@@ -560,17 +560,17 @@ function LazyEyes_GUI_AlertsTab_Create(parent)
     tsh:SetPoint("TOP", frame, "TOP", 0, y); tsh:SetText("Tracking Missing Sound"); tsh:SetTextColor(1, 0.82, 0)
     y = y - 24
 
-    local tsi = LazyEyes_GUI_GetSetting("trackingSound", 1)
+    local tsi = lazyscan_GUI_GetSetting("trackingSound", 1)
     local tsndBtn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
     tsndBtn:SetSize(200, 22); tsndBtn:SetPoint("TOP", frame, "TOP", 0, y)
-    tsndBtn:SetText(LazyEyes_WarningSounds[tsi] and LazyEyes_WarningSounds[tsi].name or "Raid Warning")
+    tsndBtn:SetText(lazyscan_WarningSounds[tsi] and lazyscan_WarningSounds[tsi].name or "Raid Warning")
     tsndBtn:SetScript("OnClick", function(self)
         tsi = tsi + 1
-        if tsi > #LazyEyes_WarningSounds then tsi = 1 end
-        self:SetText(LazyEyes_WarningSounds[tsi].name)
-        LazyEyes_GUI_SetSetting("trackingSound", tsi)
-        LazyEyes_GUI_SetSetting("trackingSoundID", LazyEyes_WarningSounds[tsi].id)
-        PlaySound(LazyEyes_WarningSounds[tsi].id, "Master")
+        if tsi > #lazyscan_WarningSounds then tsi = 1 end
+        self:SetText(lazyscan_WarningSounds[tsi].name)
+        lazyscan_GUI_SetSetting("trackingSound", tsi)
+        lazyscan_GUI_SetSetting("trackingSoundID", lazyscan_WarningSounds[tsi].id)
+        PlaySound(lazyscan_WarningSounds[tsi].id, "Master")
     end)
 
     frame:Hide()
@@ -638,7 +638,7 @@ local function AbbreviateName(name, maxLen)
 end
 
 local function GetSkillColor(nodeSkill)
-    local playerSkill = LazyEyes_GetMiningSkill() or 0
+    local playerSkill = lazyscan_GetMiningSkill() or 0
     if playerSkill < nodeSkill       then return 1.0, 0.1, 0.1 end  -- red: can't mine yet
     if playerSkill < nodeSkill + 25  then return 0.9, 0.6, 0.2 end  -- orange: challenging
     if playerSkill < nodeSkill + 50  then return 0.9, 0.9, 0.0 end  -- yellow: moderate
@@ -676,11 +676,11 @@ local function BuildNodeList(data, category, parentFrame, allPills, scrollChild,
             if first then name = FirstChar(first) .. ". " .. rest end
         end
         local p = MakePill(cf, name, pillW, pillH, function(isOn)
-            LazyEyes_GUI_SetNodeEnabled(category, node.name, isOn)
+            lazyscan_GUI_SetNodeEnabled(category, node.name, isOn)
         end)
         -- Tooltip with full name and skill
         p:SetScript("OnEnter", function(self)
-            LazyEyes_GUI.nodeHovered = true
+            lazyscan_GUI.nodeHovered = true
             GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
             GameTooltip:AddLine(GetNodeDisplayName(node), 1, 0.82, 0)
             GameTooltip:AddLine("Skill: " .. node.skill, GetSkillColor(node.skill))
@@ -688,12 +688,12 @@ local function BuildNodeList(data, category, parentFrame, allPills, scrollChild,
             self:SetBackdropColor(self.isOn and 0.22 or 0.32, self.isOn and 0.42 or 0.32, self.isOn and 0.18 or 0.32, 0.95)
         end)
         p:SetScript("OnLeave", function(self)
-            LazyEyes_GUI.nodeHovered = false
+            lazyscan_GUI.nodeHovered = false
             self:UpdateState()
             GameTooltip:Hide()
         end)
 
-        p.isOn = LazyEyes_GUI_IsNodeEnabled(category, node.name)
+        p.isOn = lazyscan_GUI_IsNodeEnabled(category, node.name)
         p:UpdateState()
 
         if inRow >= maxRow then inRow = 0; px = 0; py = py - (pillH + gap) end
@@ -708,7 +708,7 @@ local function BuildNodeList(data, category, parentFrame, allPills, scrollChild,
     return cf, yOffset - cf:GetHeight() - 6
 end
 
-function LazyEyes_GUI_NodesTab_Create(parent)
+function lazyscan_GUI_NodesTab_Create(parent)
     local frame = CreateFrame("Frame", nil, parent)
     frame:SetAllPoints()
 
@@ -743,7 +743,7 @@ function LazyEyes_GUI_NodesTab_Create(parent)
         sf.allPills = {}
         local sy = 0
         local cat = (st.key == "ores") and "ores" or "herbs"
-        local data = (st.key == "ores") and LazyEyes_OreData or LazyEyes_HerbData
+        local data = (st.key == "ores") and lazyscan_OreData or lazyscan_HerbData
 
         -- Group by expansion
         local byExp = {}
@@ -769,7 +769,7 @@ function LazyEyes_GUI_NodesTab_Create(parent)
     end
 
     -- Sub-tabs: Ores / Herbs (positioned below main tabs)
-    LazyEyes_GUI_Tabs_Create(frame, {
+    lazyscan_GUI_Tabs_Create(frame, {
         { key = "ores", label = "Ores", frame = subFrames.ores },
         { key = "herbs", label = "Herbs", frame = subFrames.herbs },
     }, -5)
@@ -786,10 +786,10 @@ function LazyEyes_GUI_NodesTab_Create(parent)
     return frame
 end
 
-function LazyEyes_GUI_NodesTab_Refresh(allPills)
+function lazyscan_GUI_NodesTab_Refresh(allPills)
     for catKey, pills in pairs(allPills) do
         for name, pill in pairs(pills) do
-            pill.isOn = LazyEyes_GUI_IsNodeEnabled(catKey, name)
+            pill.isOn = lazyscan_GUI_IsNodeEnabled(catKey, name)
             pill:UpdateState()
         end
     end
@@ -798,8 +798,8 @@ end
 -- =============================================
 -- OPTIONS PANEL
 -- =============================================
-function LazyEyes_GUI_Options_Create()
-    local f = CreateFrame("Frame", "LazyEyesOptionsFrame", UIParent, nil)
+function lazyscan_GUI_Options_Create()
+    local f = CreateFrame("Frame", "lazyscanOptionsFrame", UIParent, nil)
     f:SetSize(420, 480)
     f:SetFrameStrata("HIGH")
     f:SetBackdrop({
@@ -810,7 +810,7 @@ function LazyEyes_GUI_Options_Create()
     })
     f:SetPoint("CENTER")
     f:Hide()
-    tinsert(UISpecialFrames, "LazyEyesOptionsFrame")
+    tinsert(UISpecialFrames, "lazyscanOptionsFrame")
     f:SetMovable(true); f:EnableMouse(true); f:RegisterForDrag("LeftButton")
     f:SetScript("OnDragStart", function(self) self:StartMoving() end)
     f:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
@@ -821,7 +821,7 @@ function LazyEyes_GUI_Options_Create()
     tb:SetPoint("TOP", 0, 12); tb:SetSize(200, 30)
 
     f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    f.title:SetPoint("TOP", 0, 8); f.title:SetText("LazyEyes Options"); f.title:SetTextColor(1, 0.82, 0)
+    f.title:SetPoint("TOP", 0, 8); f.title:SetText("lazyscan Options"); f.title:SetTextColor(1, 0.82, 0)
 
     f.closeBtn = CreateFrame("Button", nil, f, "UIPanelCloseButton")
     f.closeBtn:SetPoint("TOPRIGHT", -2, -2)
@@ -835,31 +835,31 @@ function LazyEyes_GUI_Options_Create()
     cf:SetSize(390, 380)
     cf:SetPoint("TOP", f, "TOP", 0, -58)
 
-    scanTab = LazyEyes_GUI_ScanTab_Create(cf)
-    alertsTab = LazyEyes_GUI_AlertsTab_Create(cf)
-    nodesTab = LazyEyes_GUI_NodesTab_Create(cf)
+    scanTab = lazyscan_GUI_ScanTab_Create(cf)
+    alertsTab = lazyscan_GUI_AlertsTab_Create(cf)
+    nodesTab = lazyscan_GUI_NodesTab_Create(cf)
 
-    local tabGroup = LazyEyes_GUI_Tabs_Create(f, {
+    local tabGroup = lazyscan_GUI_Tabs_Create(f, {
         { key = "nodes", label = "Nodes", frame = nodesTab },
         { key = "scan", label = "Scan", frame = scanTab },
         { key = "alerts", label = "Alerts", frame = alertsTab },
     }, -24)
 
-    LazyEyes_GUI.optionsFrame = f
-    LazyEyes_GUI.nodesTab = nodesTab
+    lazyscan_GUI.optionsFrame = f
+    lazyscan_GUI.nodesTab = nodesTab
 end
 
-function LazyEyes_GUI_Options_Toggle()
-    if not LazyEyes_GUI.optionsFrame then return end
-    if LazyEyes_GUI.optionsFrame:IsShown() then LazyEyes_GUI.optionsFrame:Hide()
-    else LazyEyes_GUI.optionsFrame:Show() end
+function lazyscan_GUI_Options_Toggle()
+    if not lazyscan_GUI.optionsFrame then return end
+    if lazyscan_GUI.optionsFrame:IsShown() then lazyscan_GUI.optionsFrame:Hide()
+    else lazyscan_GUI.optionsFrame:Show() end
 end
 
-function LazyEyes_GUI_Options_RegisterBlizzard()
-    local panel = CreateFrame("Frame", "LazyEyesBlizzardOptions", InterfaceOptionsFramePanelContainer)
-    panel.name = "LazyEyes"
+function lazyscan_GUI_Options_RegisterBlizzard()
+    local panel = CreateFrame("Frame", "lazyscanBlizzardOptions", InterfaceOptionsFramePanelContainer)
+    panel.name = "lazyscan"
     panel.title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    panel.title:SetPoint("TOPLEFT", 16, -16); panel.title:SetText("LazyEyes Mining")
+    panel.title:SetPoint("TOPLEFT", 16, -16); panel.title:SetText("lazyscan")
     panel.desc = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     panel.desc:SetPoint("TOPLEFT", panel.title, "BOTTOMLEFT", 0, -8)
     panel.desc:SetText("Minimap scanner with flash & sound alerts.\nVersion 1.0")
@@ -867,6 +867,6 @@ function LazyEyes_GUI_Options_RegisterBlizzard()
     panel.openBtn = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
     panel.openBtn:SetSize(120, 24); panel.openBtn:SetPoint("TOPLEFT", panel.desc, "BOTTOMLEFT", 0, -20)
     panel.openBtn:SetText("Open Settings")
-    panel.openBtn:SetScript("OnClick", function() InterfaceOptionsFrame_Show(); LazyEyes_GUI_Options_Toggle() end)
+    panel.openBtn:SetScript("OnClick", function() InterfaceOptionsFrame_Show(); lazyscan_GUI_Options_Toggle() end)
     InterfaceOptions_AddCategory(panel)
 end
