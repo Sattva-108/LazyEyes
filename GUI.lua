@@ -452,29 +452,81 @@ function LazyEyes_GUI_AlertsTab_Create(parent)
     ch:SetPoint("TOP", frame, "TOP", 0, y); ch:SetText("Flash Color"); ch:SetTextColor(1, 0.82, 0)
     y = y - 24
 
-    local cBtn = CreateFrame("Button", nil, frame, nil)
-    cBtn:SetSize(24, 24); cBtn:SetPoint("TOP", frame, "TOP", -60, y)
-    local fc = LazyEyes_GUI_GetSetting("flashColor", { r = 0, g = 1, b = 0, a = 0.5 })
-    cBtn:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8", edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
-    cBtn:SetBackdropColor(fc.r, fc.g, fc.b, fc.a or 1)
-    cBtn:SetBackdropBorderColor(0.6, 0.6, 0.6, 1)
-    local cl = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    cl:SetPoint("LEFT", cBtn, "RIGHT", 8, 0); cl:SetText("Click to change")
+    local cBtn = CreateFrame("Button", nil, frame)
+    cBtn:SetSize(24, 24)
+    cBtn:SetPoint("TOP", frame, "TOP", -60, y)
 
-    local function ColorCB(restore)
-        local r, g, b, a
-        if restore then r, g, b, a = unpack(restore) else a = 1; r, g, b = ColorPickerFrame:GetColorRGB() end
-        LazyEyes_GUI_SetSetting("flashColor", { r = r, g = g, b = b, a = a })
-        cBtn:SetBackdropColor(r, g, b, a)
+    local colorSwatch = cBtn:CreateTexture(nil, "OVERLAY")
+    colorSwatch:SetSize(19, 19)
+    colorSwatch:SetTexture("Interface\\ChatFrame\\ChatFrameColorSwatch")
+    colorSwatch:SetPoint("LEFT", cBtn, "LEFT", 2, 0)
+
+    local bgTex = cBtn:CreateTexture(nil, "BACKGROUND")
+    bgTex:SetSize(16, 16)
+    bgTex:SetTexture(1, 1, 1)
+    bgTex:SetPoint("CENTER", colorSwatch)
+
+    local checkers = cBtn:CreateTexture(nil, "BACKGROUND")
+    checkers:SetSize(14, 14)
+    checkers:SetTexture("Tileset\\Generic\\Checkers")
+    checkers:SetTexCoord(0.25, 0, 0.5, 0.25)
+    checkers:SetDesaturated(true)
+    checkers:SetVertexColor(1, 1, 1, 0.75)
+    checkers:SetPoint("CENTER", colorSwatch)
+
+    local cl = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    cl:SetPoint("LEFT", colorSwatch, "RIGHT", 8, 0)
+    cl:SetText("Click to change")
+
+    local pickerR, pickerG, pickerB, pickerA
+
+    local function UpdateSwatch()
+        colorSwatch:SetVertexColor(pickerR, pickerG, pickerB, pickerA)
     end
-    cBtn:SetScript("OnClick", function(self)
-        local c = LazyEyes_GUI_GetSetting("flashColor", { r = 0, g = 1, b = 0, a = 0.5 })
-        ColorPickerFrame:SetColorRGB(c.r, c.g, c.b)
-        ColorPickerFrame.hasOpacity = true; ColorPickerFrame.opacity = c.a or 1
-        ColorPickerFrame.func = ColorCB; ColorPickerFrame.opacityFunc = ColorCB
-        ColorPickerFrame.cancelFunc = function(restore) ColorCB(restore) end
-        ColorPickerFrame:SetAllPoints(self); ColorPickerFrame:Show()
+
+    do
+        local fc = LazyEyes_GUI_GetSetting("flashColor", { r = 0, g = 1, b = 0, a = 0.5 })
+        pickerR, pickerG, pickerB, pickerA = fc.r, fc.g, fc.b, fc.a or 1
+        UpdateSwatch()
+    end
+
+    cBtn:SetScript("OnClick", function()
+        HideUIPanel(ColorPickerFrame)
+        ColorPickerFrame:SetFrameStrata("FULLSCREEN_DIALOG")
+
+        local savedR, savedG, savedB, savedA = pickerR, pickerG, pickerB, pickerA
+
+        ColorPickerFrame:SetColorRGB(pickerR, pickerG, pickerB)
+        ColorPickerFrame.hasOpacity = true
+        ColorPickerFrame.opacity = 1 - pickerA
+
+        ColorPickerFrame.func = function()
+            local r, g, b = ColorPickerFrame:GetColorRGB()
+            local a = 1 - OpacitySliderFrame:GetValue()
+            pickerR, pickerG, pickerB, pickerA = r, g, b, a
+            UpdateSwatch()
+            LazyEyes_GUI_SetSetting("flashColor", { r = r, g = g, b = b, a = a })
+        end
+
+        ColorPickerFrame.opacityFunc = function()
+            local r, g, b = ColorPickerFrame:GetColorRGB()
+            local a = 1 - OpacitySliderFrame:GetValue()
+            pickerR, pickerG, pickerB, pickerA = r, g, b, a
+            UpdateSwatch()
+            LazyEyes_GUI_SetSetting("flashColor", { r = r, g = g, b = b, a = a })
+        end
+
+        ColorPickerFrame.cancelFunc = function()
+            pickerR, pickerG, pickerB, pickerA = savedR, savedG, savedB, savedA
+            UpdateSwatch()
+            LazyEyes_GUI_SetSetting("flashColor", { r = savedR, g = savedG, b = savedB, a = savedA })
+        end
+
+        ShowUIPanel(ColorPickerFrame)
     end)
+
+    cBtn:SetScript("OnEnter", function() cBtn:LockHighlight() end)
+    cBtn:SetScript("OnLeave", function() cBtn:UnlockHighlight() end)
     y = y - 32
 
     local sh = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")

@@ -100,6 +100,9 @@ flashFrame:SetScript("OnUpdate", function(self, elapsed)
 end)
 
 local function FlashScreen()
+    local c = LazyEyes.saveData and LazyEyes.saveData.settings
+        and LazyEyes.saveData.settings.flashColor or { r = 0, g = 1, b = 0, a = 0.5 }
+    flashTexture:SetVertexColor(c.r, c.g, c.b, c.a or 0.6)
     flashFrame:Show()
     isFlashing = true
     flashElapsed = 0
