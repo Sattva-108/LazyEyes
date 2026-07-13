@@ -236,6 +236,13 @@ local function RestoreMinimap()
 end
 
 -- =============================================
+-- CURSOR GUARD (prevent false alerts over GUI)
+-- =============================================
+local function CursorBusy()
+    return LazyEyes_GUI and LazyEyes_GUI.nodeHovered
+end
+
+-- =============================================
 -- MINIMAP PROBE (prepare + position under cursor)
 -- =============================================
 local function PrepareMinimap()
@@ -389,7 +396,7 @@ local function ScanUpdate(self, elapsed)
         timeElapsed = timeElapsed + elapsed
         local interval = 0.5
         local inCombat = LazyEyes.saveData.settings.pauseInCombat and UnitAffectingCombat("player")
-        if timeElapsed >= interval and not IsMouselooking() and not IsMouseButtonDown(1) and not inCombat then
+        if timeElapsed >= interval and not IsMouselooking() and not IsMouseButtonDown(1) and not inCombat and not CursorBusy() then
             LazyEyes_SwitchState("REPOSITION_MINIMAP")
         end
 
@@ -422,7 +429,9 @@ local function ScanUpdate(self, elapsed)
         end
 
         -- Frame 3+: check tooltip text
-        if IsMatch() then
+        if CursorBusy() then
+            LazyEyes_SwitchState("RESET_STATE")
+        elseif IsMatch() then
             -- Node found! Flash + sound
             if LazyEyes.saveData.settings.flashScreen then FlashScreen() end
             if LazyEyes.saveData.settings.playSound then PlayAlertSound() end

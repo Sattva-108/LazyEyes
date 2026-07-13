@@ -671,13 +671,18 @@ local function BuildNodeList(data, category, parentFrame, allPills, scrollChild,
         end)
         -- Tooltip with full name and skill
         p:SetScript("OnEnter", function(self)
+            LazyEyes_GUI.nodeHovered = true
             GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
             GameTooltip:AddLine(GetNodeDisplayName(node), 1, 0.82, 0)
             GameTooltip:AddLine("Skill: " .. node.skill, GetSkillColor(node.skill))
             GameTooltip:Show()
             self:SetBackdropColor(self.isOn and 0.22 or 0.32, self.isOn and 0.42 or 0.32, self.isOn and 0.18 or 0.32, 0.95)
         end)
-        p:SetScript("OnLeave", function(self) self:UpdateState(); GameTooltip:Hide() end)
+        p:SetScript("OnLeave", function(self)
+            LazyEyes_GUI.nodeHovered = false
+            self:UpdateState()
+            GameTooltip:Hide()
+        end)
 
         p.isOn = LazyEyes_GUI_IsNodeEnabled(category, node.name)
         p:UpdateState()
@@ -832,6 +837,7 @@ function LazyEyes_GUI_Options_Create()
     }, -24)
 
     LazyEyes_GUI.optionsFrame = f
+    LazyEyes_GUI.nodesTab = nodesTab
 end
 
 function LazyEyes_GUI_Options_Toggle()
