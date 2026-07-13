@@ -15,9 +15,6 @@ function LazyEyes_GetDefaultSettings()
         trackingSoundID = 8959,
         
         -- GUI settings
-        zoomToMinimap = true,
-        difficultyColors = true,
-        pauseOnTarget = false,
         flashColor = { r = 0, g = 1, b = 0, a = 0.5 },
         soundID = 891,
         

@@ -301,10 +301,6 @@ function LazyEyes_GUI_HUD_Create()
     f.soundPill:SetPoint("LEFT", f.flashPill, "RIGHT", 4, 0)
     f.soundPill.isOn = LazyEyes_GUI_GetSetting("playSound", true); f.soundPill:UpdateState()
 
-    f.zoomPill = MakePill(f, "Zoom", 52, 18, function(v) LazyEyes_GUI_SetSetting("zoomToMinimap", v) end)
-    f.zoomPill:SetPoint("LEFT", f.soundPill, "RIGHT", 4, 0)
-    f.zoomPill.isOn = LazyEyes_GUI_GetSetting("zoomToMinimap", true); f.zoomPill:UpdateState()
-
     f.actionBtn = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
     f.actionBtn:SetSize(90, 22); f.actionBtn:SetPoint("BOTTOM", 8, 12)
     f.actionBtn:SetText("Start Scan")
@@ -384,15 +380,6 @@ function LazyEyes_GUI_ScanTab_Create(parent)
 
     local h = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     h:SetPoint("TOP", frame, "TOP", 0, y); h:SetText("Scan Settings"); h:SetTextColor(1, 0.82, 0)
-    y = y - 24
-
-    MakeCheckbox(frame, "Zoom to minimap", LazyEyes_GUI_GetSetting("zoomToMinimap", true), function(v) LazyEyes_GUI_SetSetting("zoomToMinimap", v) end):SetPoint("TOP", frame, "TOP", -80, y)
-    y = y - 24
-
-    MakeCheckbox(frame, "Difficulty colors", LazyEyes_GUI_GetSetting("difficultyColors", true), function(v) LazyEyes_GUI_SetSetting("difficultyColors", v) end):SetPoint("TOP", frame, "TOP", -80, y)
-    y = y - 24
-
-    MakeCheckbox(frame, "Pause on target", LazyEyes_GUI_GetSetting("pauseOnTarget", false), function(v) LazyEyes_GUI_SetSetting("pauseOnTarget", v) end):SetPoint("TOP", frame, "TOP", -80, y)
     y = y - 24
 
     MakeCheckbox(frame, "Auto start on login", LazyEyes_GUI_GetSetting("autoStartScan", true), function(v) LazyEyes_GUI_SetSetting("autoStartScan", v) end):SetPoint("TOP", frame, "TOP", -80, y)
