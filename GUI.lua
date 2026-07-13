@@ -484,6 +484,7 @@ function LazyEyes_GUI_ScanTab_Create(parent)
     end)
 
     UpdateBindText()
+    frame:SetScript("OnShow", function() UpdateBindText() end)
 
     y = y - 28
     local sh = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
