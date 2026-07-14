@@ -128,12 +128,22 @@ clickFrame:SetAllPoints()
 clickFrame:Hide()
 
 clickFrame:SetScript("OnMouseDown", function(self, button)
-    if scanState == "TOOLTIP_CHECK" then
-        if button == "RightButton" then
-            if not mouselookActive and not IsMouselooking() then
-                mouselookActive = true
-                MouselookStart()
-            end
+    if button == "RightButton" then
+        if not mouselookActive and not IsMouselooking() then
+            mouselookActive = true
+            MouselookStart()
+        end
+    end
+end)
+
+-- Only show clickFrame when cursor is NOT over a UI element
+local clickFrameWatchdog = CreateFrame("Frame")
+clickFrameWatchdog:SetScript("OnUpdate", function()
+    if clickFrame:IsShown() then
+        local focus = GetMouseFocus()
+        local overUI = focus and focus ~= WorldFrame and focus ~= Minimap and focus ~= clickFrame
+        if overUI then
+            clickFrame:Hide()
         end
     end
 end)
@@ -167,11 +177,8 @@ mouseReleaseFrame:SetScript("OnUpdate", function()
     local rightDown = IsMouseButtonDown("RightButton")
     if rightDown and not mouselookActive and not IsMouselooking() then
         local focus = GetMouseFocus()
-        local focusName = focus and focus.GetName and focus:GetName() or "nil"
-        -- During scan: always allow mouselook (minimap is under cursor)
-        -- When not scanning: only allow over WorldFrame or Minimap
-        local overUI = focus and focus ~= WorldFrame and focus ~= Minimap
-        local safeToStart = not overUI or lazyscan.isActive
+        -- Only allow mouselook over WorldFrame or Minimap (never over UI elements)
+        local safeToStart = not focus or focus == WorldFrame or focus == Minimap
         if safeToStart then
             mouselookActive = true
             MouselookStart()
