@@ -119,11 +119,40 @@ local function PlayAlertSound()
 end
 
 -- =============================================
+-- CLICK OVERLAY (block all clicks on minimap during scan)
+-- =============================================
+local clickFrame = CreateFrame("Button", nil, Minimap)
+clickFrame:SetFrameLevel(9001)
+clickFrame:SetFrameStrata("HIGH")
+clickFrame:SetAllPoints()
+clickFrame:Hide()
+
+clickFrame:SetScript("OnMouseDown", function(self, button)
+    if scanState == "TOOLTIP_CHECK" then
+        if button == "RightButton" then
+            if not mouselookActive and not IsMouselooking() then
+                mouselookActive = true
+                MouselookStart()
+            end
+        end
+    end
+end)
+
+-- Block dropdown menus during scan (catches Leatrix, ElvUI, and any other addon)
+-- Pre-hook: prevents the dropdown from ever showing — no flash
+local _origToggleDropDownMenu = ToggleDropDownMenu
+ToggleDropDownMenu = function(level, value, dropDownFrame, anchorName, xOffset, yOffset)
+    if scanState == "TOOLTIP_CHECK" then return end
+    return _origToggleDropDownMenu(level, value, dropDownFrame, anchorName, xOffset, yOffset)
+end
+
+-- =============================================
 -- MINIMAP MOUSE HOOKS (block right-click during scan)
 -- =============================================
 
 local hookedMinimap = false
 local mouselookActive = false
+local minimapMoveTime = 0
 
 -- OnUpdate frame to detect button state (bypasses frame event capture)
 local mouseReleaseFrame = CreateFrame("Frame")
@@ -137,9 +166,13 @@ mouseReleaseFrame:SetScript("OnUpdate", function()
     end
     local rightDown = IsMouseButtonDown("RightButton")
     if rightDown and not mouselookActive and not IsMouselooking() then
-        -- Only start mouselook if cursor is NOT over a UI element
         local focus = GetMouseFocus()
-        if not focus or focus == WorldFrame or focus == Minimap then
+        local focusName = focus and focus.GetName and focus:GetName() or "nil"
+        -- During scan: always allow mouselook (minimap is under cursor)
+        -- When not scanning: only allow over WorldFrame or Minimap
+        local overUI = focus and focus ~= WorldFrame and focus ~= Minimap
+        local safeToStart = not overUI or lazyscan.isActive
+        if safeToStart then
             mouselookActive = true
             MouselookStart()
         end
@@ -261,6 +294,7 @@ local function RestoreMinimap()
     end
 
     Minimap:EnableMouse(true)
+    clickFrame:Hide()
 end
 
 -- =============================================
@@ -295,6 +329,9 @@ local function PrepareMinimap()
             if f and f.SetAlpha then f:SetAlpha(0) end
         end
     end
+
+    -- Show click overlay to block all mouse events on minimap during scan
+    clickFrame:Show()
 end
 
 local function SetMinimapLoc(xOffset, yOffset)
@@ -305,6 +342,7 @@ local function SetMinimapLoc(xOffset, yOffset)
     local uiScale = Minimap:GetEffectiveScale()
     Minimap:ClearAllPoints()
     Minimap:SetPoint("CENTER", nil, "BOTTOMLEFT", xOffset + x/uiScale, yOffset + y/uiScale)
+    minimapMoveTime = GetTime()
     GameTooltip:SetAlpha(0)
 end
 
