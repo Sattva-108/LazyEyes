@@ -410,8 +410,9 @@ local function IsMatch()
                         matchedName = node.ru
                     end
                     if matched then
-                        -- Check if this node is enabled in GUI (always use English name)
-                        if lazyscan_GUI_IsNodeEnabled("ores", node.en) then
+                        -- Check if this node is enabled in GUI
+                        local cat = node.cat or "ores"
+                        if lazyscan_GUI_IsNodeEnabled(cat, node.en) then
                             foundNodeName = matchedName
                             return true
                         end

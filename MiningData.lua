@@ -165,7 +165,17 @@ function lazyscan_BuildTrackingList()
         table.insert(list, {
             en = enName,
             ru = info.ru or enName,
+            cat = "ores",
         })
+    end
+    if lazyscan_HerbalismData then
+        for enName, info in pairs(lazyscan_HerbalismData) do
+            table.insert(list, {
+                en = enName,
+                ru = info.ru or enName,
+                cat = "herbs",
+            })
+        end
     end
     return list
 end
