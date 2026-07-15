@@ -656,7 +656,18 @@ mainFrame:SetScript("OnEvent", function(self, event, ...)
 
     elseif event == "PLAYER_ENTERING_WORLD" then
         if lazyscan.saveData and lazyscan.saveData.settings.autoStartScan and not lazyscan.isActive then
-            lazyscan_StartScanning(true)
+            -- Delay auto-start by 3 sec so skill data loads
+            local autoTimer = 0
+            local autoFrame = CreateFrame("Frame")
+            autoFrame:SetScript("OnUpdate", function(self, elapsed)
+                autoTimer = autoTimer + elapsed
+                if autoTimer >= 3 then
+                    self:SetScript("OnUpdate", nil)
+                    if not lazyscan.isActive then
+                        lazyscan_StartScanning(true)
+                    end
+                end
+            end)
         end
 
     elseif event == "PLAYER_LOGOUT" then
