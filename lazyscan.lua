@@ -495,7 +495,11 @@ local function ScanUpdate(self, elapsed)
         if mouseoverUnitPause and not UnitExists("mouseover") then
             mouseoverUnitPause = false
         end
-        if timeElapsed >= interval and not IsMouselooking() and not IsMouseButtonDown(1) and not inCombat and not CursorBusy() and not mouseoverUnitPause then
+        -- Новая проверка: над чем сейчас курсор?
+        local focus = GetMouseFocus()
+        local isOverUI = focus and focus ~= WorldFrame and focus ~= Minimap
+
+        if timeElapsed >= interval and not IsMouselooking() and not IsMouseButtonDown(1) and not inCombat and not CursorBusy() and not mouseoverUnitPause and not isOverUI then
             lazyscan_SwitchState("REPOSITION_MINIMAP")
         end
 
