@@ -206,6 +206,7 @@ local function HookMinimap()
     local origOnMouseUp = Minimap:GetScript("OnMouseUp")
 
     Minimap:SetScript("OnMouseDown", function(self, button)
+        if not self:IsMouseOver() then return end
         local inCombat = (UnitAffectingCombat and UnitAffectingCombat("player")) and not IsMounted()
         if lazyscan.isActive and not inCombat and button == "RightButton" and Minimap:GetScale() < 0.5 then
             return
@@ -214,6 +215,7 @@ local function HookMinimap()
     end)
 
     Minimap:SetScript("OnMouseUp", function(self, button)
+        if not self:IsMouseOver() then return end
         local inCombat = (UnitAffectingCombat and UnitAffectingCombat("player")) and not IsMounted()
         if lazyscan.isActive and not inCombat and button == "RightButton" and Minimap:GetScale() < 0.5 then
             return
