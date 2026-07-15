@@ -30,6 +30,15 @@ local function HasActiveTracking()
     )
 end
 
+local function GetActiveTrackingType()
+    local currentTexture = GetTrackingTexture()
+    if currentTexture then
+        if currentTexture:find("Earthquake") then return "ores" end
+        if currentTexture:find("Flower_02") then return "herbs" end
+    end
+    return nil
+end
+
 local function CheckTrackingWarning()
     if not lazyscan.isActive or lazyscan._ignoreTrackingWarning then return end
     if not HasActiveTracking() then
@@ -410,11 +419,14 @@ local function IsMatch()
                         matchedName = node.ru
                     end
                     if matched then
-                        -- Check if this node is enabled in GUI
-                        local cat = node.cat or "ores"
-                        if lazyscan_GUI_IsNodeEnabled(cat, node.en) then
-                            foundNodeName = matchedName
-                            return true
+                        -- Only match nodes for active tracking type
+                        local activeTrack = GetActiveTrackingType()
+                        if activeTrack and node.cat == activeTrack then
+                            -- Check if this node is enabled in GUI
+                            if lazyscan_GUI_IsNodeEnabled(node.cat, node.en) then
+                                foundNodeName = matchedName
+                                return true
+                            end
                         end
                     end
                 end
