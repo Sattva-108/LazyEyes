@@ -149,14 +149,6 @@ clickFrameWatchdog:SetScript("OnUpdate", function()
     end
 end)
 
--- Block dropdown menus during scan (catches Leatrix, ElvUI, and any other addon)
--- Pre-hook: prevents the dropdown from ever showing — no flash
-local _origToggleDropDownMenu = ToggleDropDownMenu
-ToggleDropDownMenu = function(level, value, dropDownFrame, anchorName, xOffset, yOffset)
-    if scanState == "TOOLTIP_CHECK" then return end
-    return _origToggleDropDownMenu(level, value, dropDownFrame, anchorName, xOffset, yOffset)
-end
-
 -- =============================================
 -- MINIMAP MOUSE HOOKS (block right-click during scan)
 -- =============================================
@@ -226,10 +218,23 @@ end
 
 -- Hook at PLAYER_LOGIN (after all addons loaded, including ElvUI)
 local hookFrame = CreateFrame("Frame")
+local rehookTimer = 0
+local rehookDone = false
 hookFrame:RegisterEvent("PLAYER_LOGIN")
 hookFrame:SetScript("OnEvent", function(self, event)
     self:UnregisterEvent("PLAYER_LOGIN")
     HookMinimap()
+end)
+-- Re-hook after 3 sec so Leatrix saves OUR hook as "original"
+hookFrame:SetScript("OnUpdate", function(self, elapsed)
+    if rehookDone then return end
+    rehookTimer = rehookTimer + elapsed
+    if rehookTimer >= 3 then
+        rehookDone = true
+        self:SetScript("OnUpdate", nil)
+        hookedMinimap = false
+        HookMinimap()
+    end
 end)
 
 -- =============================================
