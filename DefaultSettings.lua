@@ -9,6 +9,8 @@ function lazyscan_GetDefaultSettings()
         playSound = true,
         pauseInCombat = true,
         soundEffect = 1,
+        enableNodeSound = true,
+        enableTrackingSound = true,
         restartDelay = 5,
         autoStartScan = true,
         zoomMinimap = true,

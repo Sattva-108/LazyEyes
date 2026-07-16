@@ -44,7 +44,8 @@ local function CheckTrackingWarning()
     if not HasActiveTracking() then
         DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00lazyscan:|r No mining or herb tracking active! |Hlazyscan:stop|h|cff00ccff[Stop scan]|h|r |Hlazyscan:ignore|h|cff00ccff[Ignore]|h|r")
         local snd = lazyscan.saveData and lazyscan.saveData.settings and lazyscan.saveData.settings.trackingSoundID
-        if snd then PlaySound(snd, "Master") end
+        local enabled = lazyscan.saveData and lazyscan.saveData.settings and lazyscan.saveData.settings.enableTrackingSound
+        if snd and enabled ~= false then PlaySound(snd, "Master") end
     end
 end
 
@@ -517,7 +518,7 @@ local function ScanUpdate(self, elapsed)
 
     if scanState == "WAITING" then
         timeElapsed = timeElapsed + elapsed
-        local interval = 0.00001
+        local interval = 0.5
         local inCombat = lazyscan.saveData.settings.pauseInCombat and UnitAffectingCombat("player") and not IsMounted()
         -- Clear mouseover pause if no unit under cursor (handles UI frames where CURSOR_UPDATE doesn't fire)
         if mouseoverUnitPause and not UnitExists("mouseover") then
@@ -565,7 +566,7 @@ local function ScanUpdate(self, elapsed)
         elseif IsMatch() then
             -- Node found! Flash + sound
             if lazyscan.saveData.settings.flashScreen then FlashScreen() end
-            if lazyscan.saveData.settings.playSound then PlayAlertSound() end
+            if lazyscan.saveData.settings.playSound and lazyscan.saveData.settings.enableNodeSound ~= false then PlayAlertSound() end
             if FlashClientIcon then FlashClientIcon() end
             DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00lazyscan:|r Found " .. foundNodeName .. "!")
             foundNode = true
@@ -749,7 +750,7 @@ SlashCmdList["LAZYSCAN"] = function(msg)
     elseif cmd == "test" then
         DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00lazyscan:|r Testing alerts...")
         if lazyscan.saveData.settings.flashScreen then FlashScreen() end
-        if lazyscan.saveData.settings.playSound then PlayAlertSound() end
+        if lazyscan.saveData.settings.playSound and lazyscan.saveData.settings.enableNodeSound ~= false then PlayAlertSound() end
     else
         if lazyscan.isActive then
             lazyscan_StopScanning()

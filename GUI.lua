@@ -549,13 +549,9 @@ function lazyscan_GUI_AlertsTab_Create(parent)
     cBtn:SetScript("OnLeave", function() cBtn:UnlockHighlight() end)
     y = y - 32
 
-    local sh = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    sh:SetPoint("TOP", frame, "TOP", 0, y); sh:SetText("Node Found Sound"); sh:SetTextColor(1, 0.82, 0)
-    y = y - 24
-
     local si = lazyscan_GUI_GetSetting("soundEffect", 1)
     local sndBtn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-    sndBtn:SetSize(200, 22); sndBtn:SetPoint("TOP", frame, "TOP", 0, y)
+    sndBtn:SetSize(160, 22)
     sndBtn:SetText(lazyscan_SoundEffects[si] and lazyscan_SoundEffects[si].name or "Coin")
     sndBtn:SetScript("OnClick", function(self)
         si = si + 1
@@ -565,15 +561,21 @@ function lazyscan_GUI_AlertsTab_Create(parent)
         lazyscan_GUI_SetSetting("soundID", lazyscan_SoundEffects[si].id)
         PlaySound(lazyscan_SoundEffects[si].id, "Master")
     end)
-    y = y - 32
 
-    local tsh = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    tsh:SetPoint("TOP", frame, "TOP", 0, y); tsh:SetText("Tracking Missing Sound"); tsh:SetTextColor(1, 0.82, 0)
-    y = y - 24
+    local nodeSoundCb = MakeCheckbox(frame, "Node Found Sound", lazyscan_GUI_GetSetting("enableNodeSound", true), function(v)
+        lazyscan_GUI_SetSetting("enableNodeSound", v)
+        if v then sndBtn:Enable() else sndBtn:Disable() end
+    end)
+    nodeSoundCb:SetPoint("TOP", frame, "TOP", -80, y)
+    sndBtn:SetPoint("TOPLEFT", nodeSoundCb, "TOPLEFT", 0, -22)
+    if not lazyscan_GUI_GetSetting("enableNodeSound", true) then
+        sndBtn:Disable()
+    end
+    y = y - 46
 
     local tsi = lazyscan_GUI_GetSetting("trackingSound", 1)
     local tsndBtn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-    tsndBtn:SetSize(200, 22); tsndBtn:SetPoint("TOP", frame, "TOP", 0, y)
+    tsndBtn:SetSize(160, 22)
     tsndBtn:SetText(lazyscan_WarningSounds[tsi] and lazyscan_WarningSounds[tsi].name or "Raid Warning")
     tsndBtn:SetScript("OnClick", function(self)
         tsi = tsi + 1
@@ -583,6 +585,16 @@ function lazyscan_GUI_AlertsTab_Create(parent)
         lazyscan_GUI_SetSetting("trackingSoundID", lazyscan_WarningSounds[tsi].id)
         PlaySound(lazyscan_WarningSounds[tsi].id, "Master")
     end)
+
+    local trackSoundCb = MakeCheckbox(frame, "Tracking Missing Sound", lazyscan_GUI_GetSetting("enableTrackingSound", true), function(v)
+        lazyscan_GUI_SetSetting("enableTrackingSound", v)
+        if v then tsndBtn:Enable() else tsndBtn:Disable() end
+    end)
+    trackSoundCb:SetPoint("TOP", frame, "TOP", -80, y)
+    tsndBtn:SetPoint("TOPLEFT", trackSoundCb, "TOPLEFT", 0, -22)
+    if not lazyscan_GUI_GetSetting("enableTrackingSound", true) then
+        tsndBtn:Disable()
+    end
 
     frame:Hide()
     return frame
@@ -833,7 +845,7 @@ function lazyscan_GUI_Options_Create()
     tb:SetPoint("TOP", 0, 12); tb:SetSize(200, 30)
 
     f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    f.title:SetPoint("TOP", 0, 8); f.title:SetText("lazyscan Options"); f.title:SetTextColor(1, 0.82, 0)
+    f.title:SetPoint("TOP", 0, 6); f.title:SetText("lazyscan"); f.title:SetTextColor(0, 1, 0)
 
     f.closeBtn = CreateFrame("Button", nil, f, "UIPanelCloseButton")
     f.closeBtn:SetPoint("TOPRIGHT", -2, -2)
