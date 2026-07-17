@@ -131,37 +131,6 @@ local function PlayAlertSound()
 end
 
 -- =============================================
--- CLICK OVERLAY (block all clicks on minimap during scan)
--- =============================================
-local clickFrame = CreateFrame("Button", nil, Minimap)
-clickFrame:SetFrameLevel(9001)
-clickFrame:SetFrameStrata("HIGH")
-clickFrame:SetAllPoints()
-clickFrame:Hide()
-
-clickFrame:SetScript("OnMouseDown", function(self, button)
-    if button == "RightButton" then
-        if not mouselookActive and not IsMouselooking() then
-            mouselookActive = true
-            MouselookStart()
-        end
-    end
-end)
-
--- Only show clickFrame when cursor is NOT over a UI element
-local clickFrameWatchdog = CreateFrame("Frame")
-clickFrameWatchdog:SetScript("OnUpdate", function()
-    if clickFrame:IsShown() then
-        local focus = GetMouseFocus()
-        local mm = scanTarget or Minimap
-        local overUI = focus and focus ~= WorldFrame and focus ~= mm and focus ~= clickFrame
-        if overUI then
-            clickFrame:Hide()
-        end
-    end
-end)
-
--- =============================================
 -- MINIMAP MOUSE HOOKS (block right-click during scan)
 -- =============================================
 
@@ -216,19 +185,15 @@ local function HookMinimap()
 
         frame:SetScript("OnMouseDown", function(self, button)
             if not self:IsMouseOver() then return end
-            local inCombat = (UnitAffectingCombat and UnitAffectingCombat("player")) and not IsMounted()
-            if lazyscan.isActive and not inCombat and button == "RightButton" and self:GetScale() < 0.5 then
-                return
-            end
+            -- Block all clicks while minimap is under cursor for scan
+            if isScanning then return end
             if origDown then return origDown(self, button) end
         end)
 
         frame:SetScript("OnMouseUp", function(self, button)
             if not self:IsMouseOver() then return end
-            local inCombat = (UnitAffectingCombat and UnitAffectingCombat("player")) and not IsMounted()
-            if lazyscan.isActive and not inCombat and button == "RightButton" and self:GetScale() < 0.5 then
-                return
-            end
+            -- Block all clicks while minimap is under cursor for scan
+            if isScanning then return end
             if origUp then return origUp(self, button) end
         end)
     end
@@ -372,11 +337,6 @@ local function RestoreMinimap()
         end
     end
 
-    -- Hide click overlay and return it to default parent
-    clickFrame:Hide()
-    clickFrame:SetParent(Minimap)
-    clickFrame:ClearAllPoints()
-    clickFrame:SetAllPoints(Minimap)
 end
 
 -- =============================================
@@ -425,12 +385,6 @@ local function PrepareMinimap()
             if f and f.SetAlpha then f:SetAlpha(0) end
         end
     end
-
-    -- Show click overlay to block all mouse events on minimap during scan
-    clickFrame:SetParent(mm)
-    clickFrame:ClearAllPoints()
-    clickFrame:SetAllPoints(mm)
-    clickFrame:Show()
 end
 
 local function SetMinimapLoc(xOffset, yOffset)
