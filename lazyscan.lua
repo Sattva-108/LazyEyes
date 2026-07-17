@@ -329,12 +329,7 @@ local function RestoreMinimap()
     -- Restore FarmModeMap dragging
     if mm == FarmModeMap then
         FarmModeMap:StopMovingOrSizing()
-        if minimapSettings.origDragStart then
-            FarmModeMap:SetScript("OnDragStart", minimapSettings.origDragStart)
-            FarmModeMap:SetScript("OnDragStop", minimapSettings.origDragStop)
-            minimapSettings.origDragStart = nil
-            minimapSettings.origDragStop = nil
-        end
+        mm:RegisterForDrag("LeftButton", "RightButton")
     end
 
 end
@@ -365,10 +360,7 @@ local function PrepareMinimap()
 
     -- Disable dragging on FarmModeMap during scan
     if mm == FarmModeMap then
-        minimapSettings.origDragStart = FarmModeMap:GetScript("OnDragStart")
-        minimapSettings.origDragStop = FarmModeMap:GetScript("OnDragStop")
-        FarmModeMap:SetScript("OnDragStart", function() end)
-        FarmModeMap:SetScript("OnDragStop", function() end)
+        mm:RegisterForDrag()
     end
 
     -- Disable mouse on minimap children to prevent POI tooltips
