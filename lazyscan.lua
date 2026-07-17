@@ -357,7 +357,21 @@ local function RestoreMinimap()
 
     mm:EnableMouse(true)
     mm:EnableMouseWheel(true)
+
+    -- Restore FarmModeMap dragging and clear any drag state
+    if mm == FarmModeMap then
+        FarmModeMap:StopMovingOrSizing()
+        if minimapSettings.origMovable ~= nil then
+            FarmModeMap:SetMovable(minimapSettings.origMovable)
+            minimapSettings.origMovable = nil
+        end
+    end
+
+    -- Hide click overlay and return it to default parent
     clickFrame:Hide()
+    clickFrame:SetParent(Minimap)
+    clickFrame:ClearAllPoints()
+    clickFrame:SetAllPoints(Minimap)
 end
 
 -- =============================================
@@ -384,6 +398,12 @@ local function PrepareMinimap()
     mm:SetScale(scanScale)
     mm:EnableMouseWheel(false)
 
+    -- Disable dragging on FarmModeMap during scan
+    if mm == FarmModeMap then
+        minimapSettings.origMovable = FarmModeMap:IsMovable()
+        FarmModeMap:SetMovable(false)
+    end
+
     -- Disable mouse on minimap children to prevent POI tooltips
     -- Minimap itself stays mouse-enabled so tooltip appears for node detection
     for i = 1, select("#", mm:GetChildren()) do
@@ -400,6 +420,9 @@ local function PrepareMinimap()
     end
 
     -- Show click overlay to block all mouse events on minimap during scan
+    clickFrame:SetParent(mm)
+    clickFrame:ClearAllPoints()
+    clickFrame:SetAllPoints(mm)
     clickFrame:Show()
 end
 
