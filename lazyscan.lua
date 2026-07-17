@@ -522,6 +522,13 @@ local function ScanUpdate(self, elapsed)
     -- Skip during flight path
     if UnitOnTaxi and UnitOnTaxi("player") then return end
 
+    -- Update scan target if Farm Mode toggled during scan
+    if FarmModeMap and FarmModeMap.enabled then
+        scanTarget = FarmModeMap
+    else
+        scanTarget = Minimap
+    end
+
     -- Check tracking and zoom every 60 seconds
     trackingCheckTimer = trackingCheckTimer + elapsed
     if trackingCheckTimer >= 60 then
