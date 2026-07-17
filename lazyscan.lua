@@ -287,7 +287,10 @@ end
 -- MINIMAP STORAGE / RESTORE
 -- =============================================
 local function StoreMinimap()
-    local mm = scanTarget or Minimap
+    -- Lock the target: detect once, use throughout this scan cycle
+    local mm = (FarmModeMap and FarmModeMap:IsShown()) and FarmModeMap or Minimap
+    scanTarget = mm
+    minimapSettings.map = mm
     local point, relativeTo, relativePoint, x, y = mm:GetPoint()
     minimapSettings.point = point
     minimapSettings.relativeTo = relativeTo
@@ -553,19 +556,12 @@ local function ScanUpdate(self, elapsed)
     -- Skip during flight path
     if UnitOnTaxi and UnitOnTaxi("player") then return end
 
-    -- Update scan target if Farm Mode toggled during scan
-    if FarmModeMap and FarmModeMap.enabled then
-        scanTarget = FarmModeMap
-    else
-        scanTarget = Minimap
-    end
-
     -- Check tracking and zoom every 60 seconds
     trackingCheckTimer = trackingCheckTimer + elapsed
     if trackingCheckTimer >= 60 then
         trackingCheckTimer = 0
         CheckTrackingWarning()
-        if lazyscan.saveData.settings.zoomMinimap then (scanTarget or Minimap):SetZoom(0) end
+        if lazyscan.saveData.settings.zoomMinimap then (minimapSettings.map or Minimap):SetZoom(0) end
     end
 
     if scanState == "WAITING" then
@@ -768,10 +764,7 @@ function lazyscan_StartScanning(silent)
     end
 
     -- Detect which minimap to scan (FarmModeMap if ElvUI Farm Mode active)
-    scanTarget = Minimap
-    if FarmModeMap and FarmModeMap.enabled then
-        scanTarget = FarmModeMap
-    end
+    scanTarget = (FarmModeMap and FarmModeMap:IsShown()) and FarmModeMap or Minimap
 
     lazyscan_SwitchState("WAITING")
     mainFrame:SetScript("OnUpdate", ScanUpdate)
