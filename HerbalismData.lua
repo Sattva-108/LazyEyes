@@ -119,6 +119,10 @@ lazyscan_HerbalismData = {
         skillRequired = 300, yellowAt = 325, greenAt = 350, grayAt = 400,
         ru = "Чёрный лотос",
     },
+    ["Bloodthistle"] = {
+        skillRequired = 1, yellowAt = 25, greenAt = 50, grayAt = 100,
+        ru = "Кровопийка",
+    },
     -- TBC / Outland
     ["Felweed"] = {
         skillRequired = 300, yellowAt = 315, greenAt = 330, grayAt = 350,
@@ -184,6 +188,14 @@ lazyscan_HerbalismData = {
     ["Frost Lotus"] = {
         skillRequired = 450, yellowAt = 460, greenAt = 470, grayAt = 475,
         ru = "Северный лотос",
+    },
+    ["Frozen Herb"] = {
+        skillRequired = 415, yellowAt = 430, greenAt = 450, grayAt = 475,
+        ru = "Мерзлая трава",
+    },
+    ["Firethorn"] = {
+        skillRequired = 360, yellowAt = 385, greenAt = 410, grayAt = 460,
+        ru = "Огница",
     },
 }
 

@@ -68,7 +68,7 @@ lazyscan_HerbData = {
     { name = "Plaguebloom", nameRu = "Чумоцвет", skill = 285, exp = "classic" },
     { name = "Icecap", nameRu = "Ледяной зев", skill = 290, exp = "classic" },
     { name = "Black Lotus", nameRu = "Черный лотос", skill = 300, exp = "classic" },
-    { name = "Bloodthistle", nameRu = "Кровопийка", skill = 1, exp = "tbc" },
+    { name = "Bloodthistle", nameRu = "Кровопийка", skill = 1, exp = "classic" },
     { name = "Felweed", nameRu = "Сквернопля", skill = 300, exp = "tbc" },
     { name = "Dreaming Glory", nameRu = "Сияние грез", skill = 315, exp = "tbc" },
     { name = "Ragveil", nameRu = "Кисейница", skill = 325, exp = "tbc" },
