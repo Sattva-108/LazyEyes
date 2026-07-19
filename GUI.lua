@@ -865,8 +865,8 @@ function lazyscan_GUI_Options_Create()
 
     local tabGroup = lazyscan_GUI_Tabs_Create(f, {
         { key = "nodes", label = "Nodes", frame = nodesTab },
-        { key = "scan", label = "Scan", frame = scanTab },
         { key = "alerts", label = "Alerts", frame = alertsTab },
+        { key = "scan", label = "Scan", frame = scanTab },
     }, -24)
 
     lazyscan_GUI.optionsFrame = f
