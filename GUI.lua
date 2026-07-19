@@ -801,15 +801,32 @@ function lazyscan_GUI_NodesTab_Create(parent)
         --header:SetTextColor(1, 0.82, 0)
 
         -- Scroll frame
-        local scroll = CreateFrame("ScrollFrame", nil, sf)
+        local scrollName = "lazyscanSubScroll_" .. st.key
+        local scroll = CreateFrame("ScrollFrame", scrollName, sf)
         scroll:SetPoint("TOP", sf, "TOP", 0, -36)
         scroll:SetPoint("BOTTOM", sf, "BOTTOM", 0, 4)
         scroll:SetPoint("LEFT", sf, "LEFT", 2, 0)
         scroll:SetPoint("RIGHT", sf, "RIGHT", -16, 0)
 
+        -- ScrollBar
+        local scrollBar = CreateFrame("Slider", scrollName.."ScrollBar", scroll, "UIPanelScrollBarTemplate")
+        scrollBar:SetPoint("TOPRIGHT", scroll, "TOPRIGHT", -6, -10)
+        scrollBar:SetPoint("BOTTOMRIGHT", scroll, "BOTTOMRIGHT", -6, 10)
+        scrollBar:SetMinMaxValues(0, 0)
+        scrollBar:SetValue(0)
+        scrollBar:SetWidth(16)
+        scrollBar:SetScript("OnValueChanged", function(self, value)
+            self:GetParent():SetVerticalScroll(value)
+        end)
+
         local scrollChild = CreateFrame("Frame", nil, scroll)
         scroll:SetScrollChild(scrollChild)
         scrollChild:SetWidth(scroll:GetWidth() + 10)
+
+        -- Update scrollbar range when scroll range changes
+        scroll:SetScript("OnScrollRangeChanged", function(self, xrange, yrange)
+            _G[self:GetName().."ScrollBar"]:SetMinMaxValues(0, yrange)
+        end)
 
         sf.allPills = {}
         local sy = 0
@@ -833,7 +850,9 @@ function lazyscan_GUI_NodesTab_Create(parent)
 
         scrollChild:EnableMouseWheel(true)
         scrollChild:SetScript("OnMouseWheel", function(_, delta)
-            scroll:SetVerticalScroll(math.max(0, math.min(scroll:GetVerticalScroll() - delta * 20, scroll:GetVerticalScrollRange())))
+            local scrollbar = _G[scrollName.."ScrollBar"]
+            local min, max = scrollbar:GetMinMaxValues()
+            scrollbar:SetValue(math.max(min, math.min(scrollbar:GetValue() - delta * 20, max)))
         end)
 
         sf:Hide()
