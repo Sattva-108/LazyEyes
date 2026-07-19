@@ -13,7 +13,7 @@
 | Method | Link |
 |--------|------|
 | **Latest release** | [Download](https://github.com/Sattva-108/lazyscan/releases/latest) |
-| **Latest source** | [Download](https://github.com/Sattva-108/lazyscan/archive/refs/heads/main.zip) |
+| **Latest source** | [Download](https://github.com/Sattva-108/lazyscan/archive/refs/heads/master.zip) |
 
 ## Installation
 
