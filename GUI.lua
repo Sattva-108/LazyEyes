@@ -570,11 +570,27 @@ function lazyscan_GUI_AlertsTab_Create(parent)
     cBtn:SetScript("OnLeave", function() cBtn:UnlockHighlight() end)
     y = y - 32
 
-    MakeCheckbox(frame, "Play sound", lazyscan_GUI_GetSetting("playSound", true), function(v) lazyscan_GUI_SetSetting("playSound", v) end):SetPoint("TOP", frame, "TOP", -80, y)
+    local nodeSoundCb, sndBtn, trackSoundCb, tsndBtn
+
+    local soundCb = MakeCheckbox(frame, "Play sound", lazyscan_GUI_GetSetting("playSound", true), function(v)
+        lazyscan_GUI_SetSetting("playSound", v)
+        if v then
+            nodeSoundCb:Enable()
+            trackSoundCb:Enable()
+            if lazyscan_GUI_GetSetting("enableNodeSound", true) then sndBtn:Enable() end
+            if lazyscan_GUI_GetSetting("enableTrackingSound", true) then tsndBtn:Enable() end
+        else
+            nodeSoundCb:Disable()
+            trackSoundCb:Disable()
+            sndBtn:Disable()
+            tsndBtn:Disable()
+        end
+    end)
+    soundCb:SetPoint("TOP", frame, "TOP", -80, y)
     y = y - 24
 
     local si = lazyscan_GUI_GetSetting("soundEffect", 1)
-    local sndBtn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
+    sndBtn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
     sndBtn:SetSize(160, 22)
     sndBtn:SetText(lazyscan_SoundEffects[si] and lazyscan_SoundEffects[si].name or "Coin")
     sndBtn:SetScript("OnClick", function(self)
@@ -586,7 +602,7 @@ function lazyscan_GUI_AlertsTab_Create(parent)
         PlaySoundFile(lazyscan_SoundEffects[si].file, "Master")
     end)
 
-    local nodeSoundCb = MakeCheckbox(frame, "Node Found Sound", lazyscan_GUI_GetSetting("enableNodeSound", true), function(v)
+    nodeSoundCb = MakeCheckbox(frame, "Node Found Sound", lazyscan_GUI_GetSetting("enableNodeSound", true), function(v)
         lazyscan_GUI_SetSetting("enableNodeSound", v)
         if v then sndBtn:Enable() else sndBtn:Disable() end
     end)
@@ -598,7 +614,7 @@ function lazyscan_GUI_AlertsTab_Create(parent)
     y = y - 54
 
     local tsi = lazyscan_GUI_GetSetting("trackingSound", 1)
-    local tsndBtn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
+    tsndBtn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
     tsndBtn:SetSize(160, 22)
     tsndBtn:SetText(lazyscan_WarningSounds[tsi] and lazyscan_WarningSounds[tsi].name or "Raid Warning")
     tsndBtn:SetScript("OnClick", function(self)
@@ -610,13 +626,20 @@ function lazyscan_GUI_AlertsTab_Create(parent)
         PlaySoundFile(lazyscan_WarningSounds[tsi].file, "Master")
     end)
 
-    local trackSoundCb = MakeCheckbox(frame, "Tracking Missing Sound", lazyscan_GUI_GetSetting("enableTrackingSound", true), function(v)
+    trackSoundCb = MakeCheckbox(frame, "Tracking Missing Sound", lazyscan_GUI_GetSetting("enableTrackingSound", true), function(v)
         lazyscan_GUI_SetSetting("enableTrackingSound", v)
         if v then tsndBtn:Enable() else tsndBtn:Disable() end
     end)
     trackSoundCb:SetPoint("TOP", frame, "TOP", -54, y)
     tsndBtn:SetPoint("TOPLEFT", trackSoundCb, "TOPLEFT", 0, -26)
     if not lazyscan_GUI_GetSetting("enableTrackingSound", true) then
+        tsndBtn:Disable()
+    end
+
+    if not lazyscan_GUI_GetSetting("playSound", true) then
+        nodeSoundCb:Disable()
+        trackSoundCb:Disable()
+        sndBtn:Disable()
         tsndBtn:Disable()
     end
 
