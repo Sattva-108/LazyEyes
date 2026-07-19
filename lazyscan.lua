@@ -47,7 +47,7 @@ local function CheckTrackingWarning()
         DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00lazyscan:|r No mining or herb tracking active! |Hlazyscan:stop|h|cff00ccff[Stop scan]|h|r |Hlazyscan:ignore|h|cff00ccff[Ignore]|h|r")
         local snd = lazyscan.saveData and lazyscan.saveData.settings and lazyscan.saveData.settings.trackingSoundID
         local enabled = lazyscan.saveData and lazyscan.saveData.settings and lazyscan.saveData.settings.enableTrackingSound
-        if snd and enabled ~= false then PlaySound(snd, "Master") end
+        if snd and enabled ~= false then PlaySoundFile(snd, "Master") end
     end
 end
 
@@ -156,11 +156,11 @@ end
 local function PlayAlertSound()
     local s = lazyscan.saveData
     local soundIndex = s and s.settings and s.settings.soundEffect or 1
-    local soundId = 891
+    local soundFile = "Sound\\Interface\\iMoneyDialogOpen.wav"
     if lazyscan_SoundEffects and lazyscan_SoundEffects[soundIndex] then
-        soundId = lazyscan_SoundEffects[soundIndex].id
+        soundFile = lazyscan_SoundEffects[soundIndex].file
     end
-    PlaySound(soundId, "Master")
+    PlaySoundFile(soundFile, "Master")
 end
 
 -- =============================================
@@ -585,8 +585,9 @@ end
 -- MAIN SCAN UPDATE
 -- =============================================
 local function ScanUpdate(self, elapsed)
-    -- Skip during flight path
+    -- Skip during flight path or resting
     if UnitOnTaxi and UnitOnTaxi("player") then return end
+    if IsResting() then return end
 
     -- Update scan target when idle (not mid-cycle) to catch FarmHud/FarmMode activation
     if scanState == "WAITING" then

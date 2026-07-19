@@ -16,11 +16,11 @@ function lazyscan_GetDefaultSettings()
         zoomMinimap = true,
         detectHighLevelNodes = false,
         trackingSound = 5,
-        trackingSoundID = 12867,
+        trackingSoundID = "Sound\\Interface\\AlarmClockWarning3.wav",
 
         -- GUI settings
         flashColor = { r = 0, g = 1, b = 0, a = 0.5 },
-        soundID = 891,
+        soundID = "Sound\\Interface\\iMoneyDialogOpen.wav",
 
         -- Node toggles (ores and herbs)
         enabledNodes = {
@@ -31,16 +31,18 @@ function lazyscan_GetDefaultSettings()
 end
 
 lazyscan_SoundEffects = {
-    { name = "Coin (Default)", id = 891 },
-    { name = "Quest Complete", id = 878 },
-    { name = "Level Up", id = 888 },
-    { name = "Loot Coin", id = 120 },
+    { name = "Coin (Default)", file = "Sound\\Interface\\iMoneyDialogOpen.wav" },
+    { name = "Map Ping", file = "Sound\\Interface\\MapPing.wav" },
+    { name = "Loot Coin Large", file = "Sound\\Interface\\LootCoinLarge.wav" },
+    { name = "Magic Click", file = "Sound\\Interface\\MagicClick.wav" },
+    { name = "Bonk", file = "Sound\\Spells\\Bonk3.wav" },
+    { name = "Tranquility", file = "Sound\\Spells\\Tranquility.wav" },
+    { name = "Yarrrr", file = "Sound\\Spells\\YarrrrImpact.wav" },
 }
 
 lazyscan_WarningSounds = {
-    { name = "Raid Warning", id = 8959 },
-    { name = "Ready Check", id = 8960 },
-    { name = "PvP Flag", id = 8174 },
-    { name = "Spell Hurt", id = 847 },
-    { name = "Warning (Default)", id = 12867 },
+    { name = "Alarm (Default)", file = "Sound\\Interface\\AlarmClockWarning3.wav" },
+    { name = "Error", file = "Sound\\Interface\\Error.wav" },
+    { name = "GM Warning", file = "Sound\\Interface\\GM_ChatWarning.wav" },
+    { name = "Alarm 2", file = "Sound\\Interface\\AlarmClockWarning2.wav" },
 }

@@ -558,8 +558,8 @@ function lazyscan_GUI_AlertsTab_Create(parent)
         if si > #lazyscan_SoundEffects then si = 1 end
         self:SetText(lazyscan_SoundEffects[si].name)
         lazyscan_GUI_SetSetting("soundEffect", si)
-        lazyscan_GUI_SetSetting("soundID", lazyscan_SoundEffects[si].id)
-        PlaySound(lazyscan_SoundEffects[si].id, "Master")
+        lazyscan_GUI_SetSetting("soundID", lazyscan_SoundEffects[si].file)
+        PlaySoundFile(lazyscan_SoundEffects[si].file, "Master")
     end)
 
     local nodeSoundCb = MakeCheckbox(frame, "Node Found Sound", lazyscan_GUI_GetSetting("enableNodeSound", true), function(v)
@@ -582,8 +582,8 @@ function lazyscan_GUI_AlertsTab_Create(parent)
         if tsi > #lazyscan_WarningSounds then tsi = 1 end
         self:SetText(lazyscan_WarningSounds[tsi].name)
         lazyscan_GUI_SetSetting("trackingSound", tsi)
-        lazyscan_GUI_SetSetting("trackingSoundID", lazyscan_WarningSounds[tsi].id)
-        PlaySound(lazyscan_WarningSounds[tsi].id, "Master")
+        lazyscan_GUI_SetSetting("trackingSoundID", lazyscan_WarningSounds[tsi].file)
+        PlaySoundFile(lazyscan_WarningSounds[tsi].file, "Master")
     end)
 
     local trackSoundCb = MakeCheckbox(frame, "Tracking Missing Sound", lazyscan_GUI_GetSetting("enableTrackingSound", true), function(v)
