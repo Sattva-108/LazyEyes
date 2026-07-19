@@ -40,7 +40,7 @@
 - **Scans minimap** for ore and herb nodes **in real time**
 - Disable nodes **you don't want to gather**
 - Supports: **ElvUI Farm Mode, FarmHUD**
-- Russian client support
+- English, Russian client support
 
 ## Routes Integration
 ### [Routes Download](https://github.com/Sattva-108/Routes/releases/latest) <br>
