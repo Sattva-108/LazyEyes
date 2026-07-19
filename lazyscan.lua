@@ -77,17 +77,13 @@ tooltipWatchdog:SetScript("OnUpdate", function()
             local overUI = focus and focus ~= WorldFrame and focus ~= mm
             local isUnit = GameTooltip:GetUnit()
 
-            if not overUI then
-                if isUnit then
-                    -- NPC/player tooltip — keep visible
-                    if GameTooltip:GetAlpha() < 1 then
-                        GameTooltip:SetAlpha(1)
-                    end
-                else
-                    -- Minimap node tooltip — hide
-                    GameTooltip:SetAlpha(0)
-                    GameTooltip:SetSize(0.01, 0.01)
-                end
+            if overUI or isUnit then
+                -- UI element or NPC — show tooltip normally
+                GameTooltip:SetAlpha(1)
+            else
+                -- Minimap node — hide completely
+                GameTooltip:SetAlpha(0)
+                GameTooltip:SetSize(0.01, 0.01)
             end
         end
     elseif GameTooltip:GetAlpha() < 1 then
