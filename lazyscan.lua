@@ -200,6 +200,7 @@ local function HookMinimap()
 
     hookFrame(Minimap)
     if FarmModeMap then hookFrame(FarmModeMap) end
+    if FarmHudMinimap then hookFrame(FarmHudMinimap) end
 end
 
 -- Hook at PLAYER_LOGIN (after all addons loaded, including ElvUI)
@@ -252,9 +253,8 @@ end
 -- MINIMAP STORAGE / RESTORE
 -- =============================================
 local function StoreMinimap()
-    -- Lock the target: detect once, use throughout this scan cycle
-    local mm = (FarmModeMap and FarmModeMap:IsShown()) and FarmModeMap or Minimap
-    scanTarget = mm
+    -- Use the already-detected scanTarget, don't re-detect
+    local mm = scanTarget or Minimap
     minimapSettings.map = mm
     local point, relativeTo, relativePoint, x, y = mm:GetPoint()
     minimapSettings.point = point
@@ -332,6 +332,31 @@ local function RestoreMinimap()
         mm:RegisterForDrag("LeftButton", "RightButton")
     end
 
+    -- Restore FarmHudMinimap mouse, alpha, and unhook
+    if mm == FarmHudMinimap then
+        -- Unhook EnableMouse first
+        if minimapSettings.farmHudOrigEnableMouse then
+            FarmHudMinimap.EnableMouse = minimapSettings.farmHudOrigEnableMouse
+            minimapSettings.farmHudOrigEnableMouse = nil
+        end
+        if minimapSettings.farmHudMouseWasEnabled ~= nil then
+            FarmHudMinimap:EnableMouse(minimapSettings.farmHudMouseWasEnabled)
+            minimapSettings.farmHudMouseWasEnabled = nil
+        end
+        if minimapSettings.farmHudAlpha ~= nil then
+            FarmHudMinimap:SetAlpha(minimapSettings.farmHudAlpha)
+            minimapSettings.farmHudAlpha = nil
+        end
+        if minimapSettings.farmHudClusterAlpha ~= nil then
+            FarmHudMapCluster:SetAlpha(minimapSettings.farmHudClusterAlpha)
+            minimapSettings.farmHudClusterAlpha = nil
+        end
+        if minimapSettings.farmHudClusterWasShown ~= nil then
+            if minimapSettings.farmHudClusterWasShown then FarmHudMapCluster:Show() else FarmHudMapCluster:Hide() end
+            minimapSettings.farmHudClusterWasShown = nil
+        end
+    end
+
 end
 
 -- =============================================
@@ -345,11 +370,11 @@ end
 -- MINIMAP PROBE (prepare + position under cursor)
 -- =============================================
 local function PrepareMinimap()
-    if isScanning then return end
+    local mm = scanTarget or Minimap
+    -- Skip if already preparing the same minimap
+    if isScanning and mm == minimapSettings.map then return end
     isScanning = true
     hideTooltip = true
-
-    local mm = scanTarget or Minimap
     -- Normalize scale: target ~21px visual size regardless of minimap size
     local targetSize = 21
     local mmWidth = mm:GetWidth() or 140
@@ -361,6 +386,27 @@ local function PrepareMinimap()
     -- Disable dragging on FarmModeMap during scan
     if mm == FarmModeMap then
         mm:RegisterForDrag()
+    end
+
+    -- Enable mouse and restore alpha on FarmHudMinimap (disabled/transparent by default)
+    -- Also hook EnableMouse to prevent FarmHUD_OnUpdate from disabling it
+    if mm == FarmHudMinimap then
+        minimapSettings.farmHudMouseWasEnabled = FarmHudMinimap:IsMouseEnabled()
+        minimapSettings.farmHudAlpha = FarmHudMinimap:GetAlpha()
+        minimapSettings.farmHudClusterAlpha = FarmHudMapCluster:GetAlpha()
+        minimapSettings.farmHudClusterWasShown = FarmHudMapCluster:IsShown()
+
+        -- Hook EnableMouse to block FarmHUD_OnUpdate from disabling mouse
+        minimapSettings.farmHudOrigEnableMouse = FarmHudMinimap.EnableMouse
+        FarmHudMinimap.EnableMouse = function(self, enable)
+            if isScanning then return end
+            return minimapSettings.farmHudOrigEnableMouse(self, enable)
+        end
+
+        FarmHudMinimap:EnableMouse(true)
+        FarmHudMinimap:SetAlpha(1)
+        FarmHudMapCluster:SetAlpha(1)
+        FarmHudMapCluster:Show()
     end
 
     -- Disable mouse on minimap children to prevent POI tooltips
@@ -502,6 +548,17 @@ local function ScanUpdate(self, elapsed)
     -- Skip during flight path
     if UnitOnTaxi and UnitOnTaxi("player") then return end
 
+    -- Update scan target when idle (not mid-cycle) to catch FarmHud activation
+    if scanState == "WAITING" then
+        local fhCluster = _G["FarmHudMapCluster"]
+        local fhMinimap = _G["FarmHudMinimap"]
+        if fhCluster and fhCluster:IsVisible() and fhMinimap then
+            scanTarget = fhMinimap
+        elseif not (FarmModeMap and FarmModeMap:IsShown()) then
+            scanTarget = Minimap
+        end
+    end
+
     -- Check tracking and zoom every 60 seconds
     trackingCheckTimer = trackingCheckTimer + elapsed
     if trackingCheckTimer >= 60 then
@@ -520,7 +577,7 @@ local function ScanUpdate(self, elapsed)
         end
         -- Новая проверка: над чем сейчас курсор?
         local focus = GetMouseFocus()
-        local isOverUI = focus and focus ~= WorldFrame and focus ~= Minimap
+        local isOverUI = focus and focus ~= WorldFrame and focus ~= Minimap and focus ~= FarmModeMap and focus ~= FarmHudMinimap
 
         if timeElapsed >= interval and not IsMouselooking() and not IsMouseButtonDown(1) and not inCombat and not CursorBusy() and not mouseoverUnitPause and not isOverUI then
             lazyscan_SwitchState("REPOSITION_MINIMAP")
@@ -709,8 +766,18 @@ function lazyscan_StartScanning(silent)
         DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00lazyscan:|r No mining or herb tracking active! |Hlazyscan:stop|h|cff00ccff[Stop scan]|h|r |Hlazyscan:ignore|h|cff00ccff[Ignore]|h|r")
     end
 
-    -- Detect which minimap to scan (FarmModeMap if ElvUI Farm Mode active)
-    scanTarget = (FarmModeMap and FarmModeMap:IsShown()) and FarmModeMap or Minimap
+    -- Detect which minimap to scan: FarmHud > FarmModeMap > Minimap
+    local fhCluster = _G["FarmHudMapCluster"]
+    local fhMinimap = _G["FarmHudMinimap"]
+    local fhVisible = fhCluster and fhCluster:IsVisible()
+    local fmVisible = FarmModeMap and FarmModeMap:IsShown()
+    if fhVisible and fhMinimap then
+        scanTarget = fhMinimap
+    elseif fmVisible then
+        scanTarget = FarmModeMap
+    else
+        scanTarget = Minimap
+    end
 
     lazyscan_SwitchState("WAITING")
     mainFrame:SetScript("OnUpdate", ScanUpdate)
