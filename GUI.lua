@@ -473,19 +473,24 @@ function lazyscan_GUI_AlertsTab_Create(parent)
     h:SetPoint("TOP", frame, "TOP", 0, y); h:SetText("Alert Settings"); h:SetTextColor(1, 0.82, 0)
     y = y - 24
 
-    MakeCheckbox(frame, "Flash screen", lazyscan_GUI_GetSetting("flashScreen", true), function(v) lazyscan_GUI_SetSetting("flashScreen", v) end):SetPoint("TOP", frame, "TOP", -80, y)
+    local cBtn, cl
+
+    local flashCb = MakeCheckbox(frame, "Flash screen", lazyscan_GUI_GetSetting("flashScreen", true), function(v)
+        lazyscan_GUI_SetSetting("flashScreen", v)
+        if v then
+            cBtn:Enable()
+            cl:SetTextColor(1, 1, 1)
+        else
+            cBtn:Disable()
+            cl:SetTextColor(0.5, 0.5, 0.5)
+        end
+    end)
+    flashCb:SetPoint("TOP", frame, "TOP", -80, y)
     y = y - 24
 
-    MakeCheckbox(frame, "Play sound", lazyscan_GUI_GetSetting("playSound", true), function(v) lazyscan_GUI_SetSetting("playSound", v) end):SetPoint("TOP", frame, "TOP", -80, y)
-    y = y - 36
-
-    local ch = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    ch:SetPoint("TOP", frame, "TOP", 0, y); ch:SetText("Flash Color"); ch:SetTextColor(1, 0.82, 0)
-    y = y - 24
-
-    local cBtn = CreateFrame("Button", nil, frame)
+    cBtn = CreateFrame("Button", nil, frame)
     cBtn:SetSize(24, 24)
-    cBtn:SetPoint("TOP", frame, "TOP", -60, y)
+    cBtn:SetPoint("TOP", frame, "TOP", -54, y)
 
     local colorSwatch = cBtn:CreateTexture(nil, "OVERLAY")
     colorSwatch:SetSize(19, 19)
@@ -505,9 +510,14 @@ function lazyscan_GUI_AlertsTab_Create(parent)
     checkers:SetVertexColor(1, 1, 1, 0.75)
     checkers:SetPoint("CENTER", colorSwatch)
 
-    local cl = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    cl = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     cl:SetPoint("LEFT", colorSwatch, "RIGHT", 8, 0)
     cl:SetText("Click to change")
+
+    if not lazyscan_GUI_GetSetting("flashScreen", true) then
+        cBtn:Disable()
+        cl:SetTextColor(0.5, 0.5, 0.5)
+    end
 
     local pickerR, pickerG, pickerB, pickerA
 
@@ -559,6 +569,9 @@ function lazyscan_GUI_AlertsTab_Create(parent)
     cBtn:SetScript("OnEnter", function() cBtn:LockHighlight() end)
     cBtn:SetScript("OnLeave", function() cBtn:UnlockHighlight() end)
     y = y - 32
+
+    MakeCheckbox(frame, "Play sound", lazyscan_GUI_GetSetting("playSound", true), function(v) lazyscan_GUI_SetSetting("playSound", v) end):SetPoint("TOP", frame, "TOP", -80, y)
+    y = y - 36
 
     local si = lazyscan_GUI_GetSetting("soundEffect", 1)
     local sndBtn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
