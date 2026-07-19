@@ -51,6 +51,17 @@ local function CheckTrackingWarning()
     end
 end
 
+-- Detect GameObject under cursor (WoW 3.3.5 doesn't fire UPDATE_MOUSEOVER_UNIT for GOs)
+local function IsHoveringGameObject()
+    if not GameTooltip:IsShown() then return false end
+    if GetMouseFocus() ~= WorldFrame then return false end
+    if GameTooltip:GetUnit() or GameTooltip:GetItem() or GameTooltip:GetSpell() then
+        return false
+    end
+    local text = _G["GameTooltipTextLeft1"] and _G["GameTooltipTextLeft1"]:GetText()
+    return (text and text ~= "")
+end
+
 -- Tooltip hooks: allow text population but hide visually during scan
 local originalGameTooltipShow = GameTooltip.Show
 local originalGameTooltipSetOwner = GameTooltip.SetOwner
@@ -76,12 +87,11 @@ tooltipWatchdog:SetScript("OnUpdate", function()
             local mm = scanTarget or Minimap
             local overUI = focus and focus ~= WorldFrame and focus ~= mm
             local isUnit = GameTooltip:GetUnit()
+            local isGO = IsHoveringGameObject()
 
-            if overUI or isUnit then
-                -- UI element or NPC — show tooltip normally
+            if overUI or isUnit or isGO then
                 GameTooltip:SetAlpha(1)
             else
-                -- Minimap node — hide completely
                 GameTooltip:SetAlpha(0)
                 GameTooltip:SetSize(0.01, 0.01)
             end
@@ -602,8 +612,9 @@ local function ScanUpdate(self, elapsed)
         -- Новая проверка: над чем сейчас курсор?
         local focus = GetMouseFocus()
         local isOverUI = focus and focus ~= WorldFrame and focus ~= Minimap and focus ~= FarmModeMap and focus ~= FarmHudMinimap
+        local isGO = IsHoveringGameObject()
 
-        if timeElapsed >= interval and not IsMouselooking() and not IsMouseButtonDown(1) and not inCombat and not CursorBusy() and not mouseoverUnitPause and not isOverUI then
+        if timeElapsed >= interval and not IsMouselooking() and not IsMouseButtonDown(1) and not inCombat and not CursorBusy() and not mouseoverUnitPause and not isOverUI and not isGO then
             lazyscan_SwitchState("REPOSITION_MINIMAP")
         end
 
