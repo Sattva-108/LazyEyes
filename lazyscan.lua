@@ -550,13 +550,13 @@ local function ScanUpdate(self, elapsed)
     -- Skip during flight path
     if UnitOnTaxi and UnitOnTaxi("player") then return end
 
-    -- Update scan target when idle (not mid-cycle) to catch FarmHud activation
+    -- Update scan target when idle (not mid-cycle) to catch FarmHud/FarmMode activation
     if scanState == "WAITING" then
-        local fhCluster = _G["FarmHudMapCluster"]
-        local fhMinimap = _G["FarmHudMinimap"]
-        if fhCluster and fhCluster:IsVisible() and fhMinimap then
-            scanTarget = fhMinimap
-        elseif not (FarmModeMap and FarmModeMap:IsShown()) then
+        if FarmHudMapCluster and FarmHudMapCluster:IsVisible() then
+            scanTarget = FarmHudMinimap
+        elseif FarmModeMap and FarmModeMap:IsShown() then
+            scanTarget = FarmModeMap
+        else
             scanTarget = Minimap
         end
     end
