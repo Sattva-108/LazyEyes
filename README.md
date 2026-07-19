@@ -8,6 +8,12 @@
 
 ---
 
+## How it works
+
+<img width="458" height="333" alt="lazyscan" src="https://github.com/user-attachments/assets/dce01b17-75b1-4f9a-adfe-d500ef79d3dc" />
+
+
+  
 ## Download
 
 | Method | Link |
@@ -45,4 +51,8 @@
 ## Routes Integration
 ### [Routes Download](https://github.com/Sattva-108/Routes/releases/latest) <br>
 If you use [Routes](https://github.com/Sattva-108/Routes/releases/latest) to draw gathering routes<br> Make sure you are using the updated version from the link above. <br> Older versions of Routes are not compatible with **lazyscan**.
+
+## Known Issues
+- Left Click Mouse-Look can be "eaten" (3.3.5 API Limitations) 
+  -  It doesn't affect clicking mob, object, UI or anything else. Only mouse look is affected.
 
