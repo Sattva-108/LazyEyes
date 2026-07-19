@@ -665,6 +665,13 @@ function lazyscan_GUI_AlertsTab_Create(parent)
     if not lazyscan_GUI_GetSetting("enableTrackingSound", true) then
         tsndBtn:Disable()
     end
+    y = y - 54
+
+    MakeCheckbox(frame, "Print Found in Chat", lazyscan_GUI_GetSetting("printFoundAlert", true), function(v) lazyscan_GUI_SetSetting("printFoundAlert", v) end):SetPoint("TOP", frame, "TOP", -80, y)
+    y = y - 24
+
+    MakeCheckbox(frame, "Error Frame Alert", lazyscan_GUI_GetSetting("errorFrameAlert", true), function(v) lazyscan_GUI_SetSetting("errorFrameAlert", v) end):SetPoint("TOP", frame, "TOP", -80, y)
+    y = y - 24
 
     if not lazyscan_GUI_GetSetting("playSound", true) then
         nodeSoundCb:Disable()

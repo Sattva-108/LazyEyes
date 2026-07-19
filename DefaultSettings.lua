@@ -11,6 +11,8 @@ function lazyscan_GetDefaultSettings()
         soundEffect = 1,
         enableNodeSound = true,
         enableTrackingSound = true,
+        printFoundAlert = true,
+        errorFrameAlert = true,
         restartDelay = 5,
         autoStartScan = true,
         zoomMinimap = true,

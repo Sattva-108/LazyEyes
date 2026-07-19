@@ -666,7 +666,12 @@ local function ScanUpdate(self, elapsed)
             if lazyscan.saveData.settings.flashScreen then FlashScreen() end
             if lazyscan.saveData.settings.playSound and lazyscan.saveData.settings.enableNodeSound ~= false then PlayAlertSound() end
             if FlashClientIcon then FlashClientIcon() end
-            DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00lazyscan:|r Found " .. foundNodeName .. "!")
+            if lazyscan.saveData.settings.printFoundAlert then
+                DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00lazyscan:|r Found " .. foundNodeName .. "!")
+            end
+            if lazyscan.saveData.settings.errorFrameAlert then
+                UIErrorsFrame:AddMessage("Found " .. foundNodeName, 0, 1, 0, 1, 3)
+            end
             nodeBlacklist[foundNodeName] = GetTime() + 10  -- pause this node for 10 sec
             foundNode = true
             lazyscan_SwitchState("RESET_STATE")
